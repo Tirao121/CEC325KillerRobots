@@ -130,7 +130,7 @@ void setup() {
 }
 
 // distance variables
-int proxThreshold = 100;
+int `Threshold = 100;
 int proximity = 0;
 int leftButtonState;
 int leftLastButtonState = 1;
