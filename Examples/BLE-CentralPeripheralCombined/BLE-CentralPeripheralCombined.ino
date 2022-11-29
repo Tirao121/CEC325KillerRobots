@@ -1,11 +1,12 @@
 /*
-  BLE-ButtonLED
+  BLE-CentralPeripheralCombined
 
-  This sets up an output (read/write) LED and an input (READ/NOTIFY)
-  on an Nano Connect RP2040 based board.
+  This sets up a device to read and listen to a button press 
+  and then turns on an LED and plays a noise on a seperate device when the button is pressed
 
-  Seth McNeill
-  2022 November 21
+  Killer Robots from Outer Space (KROS)
+  Peter Schmitt, Rita Tagarao, Logan Setzkorn, Jacob Block 
+  2022 November 29
   Based on the ArduinoBLE LED sketch combined with ButtonLED
 
   This example code is in the public domain.
