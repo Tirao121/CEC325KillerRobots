@@ -2,7 +2,7 @@
 CEC325, CEC326 Final Project
 
 Contributors:
-  Jacob Block TEST
+  Jacob Block 
   Logan Setzkorn
   Peter Schmitt
   
