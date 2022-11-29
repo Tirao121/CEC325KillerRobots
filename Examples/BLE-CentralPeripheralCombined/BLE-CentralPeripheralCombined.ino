@@ -1,11 +1,12 @@
 /*
-  BLE-ButtonLED
+  BLE-CentralPeripheralCombined
 
-  This sets up an output (read/write) LED and an input (READ/NOTIFY)
-  on an Nano Connect RP2040 based board.
+  This sets up a device to read and listen to a button press 
+  and then turns on an LED and plays a noise on a seperate device when the button is pressed
 
-  Seth McNeill
-  2022 November 21
+  Killer Robots from Outer Space (KROS)
+  Peter Schmitt, Rita Tagarao, Logan Setzkorn, Jacob Block 
+  2022 November 29
   Based on the ArduinoBLE LED sketch combined with ButtonLED
 
   This example code is in the public domain.
@@ -28,8 +29,8 @@ BLEByteCharacteristic LEDCharacteristic(BLE_UUID_LED, BLERead | BLEWrite);
 BLEByteCharacteristic buttonCharacteristic(BLE_UUID_BUTTON, BLERead | BLENotify);
 
 // define which device this is
-#define Peripheral 1
-char* robotName = "KROS1";
+#define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
+char* robotName = "KROS"; //Don't change
 
 // variables for button
 #define RIGHT_BUTTON_PIN   A0
@@ -57,7 +58,7 @@ void setup() {
     Serial.println("Bluetooth® Low Energy Central - LED control");
   }
 
-  if (Peripheral == 1) {
+  if (setPeripheral == 1) {
    // set advertised local name and service UUID:
     BLE.setDeviceName(robotName);
     BLE.setLocalName(robotName);
@@ -81,12 +82,14 @@ void setup() {
   }
   else {
     // start scanning for peripherals
+    Serial.println("Connecting to Peripheral");
     BLE.scanForUuid(BLE_UUID_PERIPHERAL);
+    Serial.println("Connected to Peripheral");
   }
 }
 
 void loop() {
-  if (Peripheral ==1) {
+  if (setPeripheral ==1) {
     // listen for Bluetooth® Low Energy peripherals to connect:
     BLEDevice central = BLE.central();
 
@@ -142,7 +145,7 @@ void loop() {
       Serial.print(peripheral.advertisedServiceUuid());
       Serial.println();
 
-      if (peripheral.localName() != "BUTTON_LED") {
+      if (peripheral.localName() != robotName) {
         Serial.print("Wrong local name: ");
         Serial.println(peripheral.localName());
         return;
@@ -156,6 +159,7 @@ void loop() {
       // peripheral disconnected, start scanning again
       BLE.scanForUuid(BLE_UUID_PERIPHERAL);
     }
+    Serial.println(peripheral);
   }
  }
  
