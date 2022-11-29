@@ -44,9 +44,9 @@ void loop() {
       break;
     default:  //Idle (all operations suspended)
       //All operations off and safe
+      //Add message to tft saying idle
     break;
   }
-
 }
 
 void persue {
