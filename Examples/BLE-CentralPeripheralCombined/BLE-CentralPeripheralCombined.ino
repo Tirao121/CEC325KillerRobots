@@ -28,8 +28,8 @@ BLEByteCharacteristic LEDCharacteristic(BLE_UUID_LED, BLERead | BLEWrite);
 BLEByteCharacteristic buttonCharacteristic(BLE_UUID_BUTTON, BLERead | BLENotify);
 
 // define which device this is
-#define Peripheral 1
-char* robotName = "KROS1";
+#define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
+char* robotName = "KROS"; //Don't change
 
 // variables for button
 #define RIGHT_BUTTON_PIN   A0
@@ -57,7 +57,7 @@ void setup() {
     Serial.println("Bluetooth® Low Energy Central - LED control");
   }
 
-  if (Peripheral == 1) {
+  if (setPeripheral == 1) {
    // set advertised local name and service UUID:
     BLE.setDeviceName(robotName);
     BLE.setLocalName(robotName);
@@ -81,12 +81,14 @@ void setup() {
   }
   else {
     // start scanning for peripherals
+    Serial.println("Connecting to Peripheral");
     BLE.scanForUuid(BLE_UUID_PERIPHERAL);
+    Serial.println("Connected to Peripheral");
   }
 }
 
 void loop() {
-  if (Peripheral ==1) {
+  if (setPeripheral ==1) {
     // listen for Bluetooth® Low Energy peripherals to connect:
     BLEDevice central = BLE.central();
 
@@ -142,7 +144,7 @@ void loop() {
       Serial.print(peripheral.advertisedServiceUuid());
       Serial.println();
 
-      if (peripheral.localName() != "BUTTON_LED") {
+      if (peripheral.localName() != robotName) {
         Serial.print("Wrong local name: ");
         Serial.println(peripheral.localName());
         return;
@@ -156,6 +158,7 @@ void loop() {
       // peripheral disconnected, start scanning again
       BLE.scanForUuid(BLE_UUID_PERIPHERAL);
     }
+    Serial.println(peripheral);
   }
  }
  
