@@ -56,7 +56,36 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
   Serial.println("Starting...");
+
+  myservo.attach(SERVO_PIN);
+
+ //I think we need this for the distance sensor -Jacob
+  Wire.begin();
+  muxU31.attach(Wire, 0x20);
+  muxU31.polarity(PCA95x5::Polarity::ORIGINAL_ALL);
+  muxU31.direction(0x1CFF);  // 1 is input, see schematic to get upper and lower bytes
+  muxU31.write(PCA95x5::Port::P09, PCA95x5::Level::H);  // enable VL6180 distance sensor
+  //I think we need this for the distance sensor -Jacob
+
+  pinMode(BUZZ_PIN, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  pinMode(TFT_CS, OUTPUT);
+
+  // Distance sensor setup
+  sensor.init();
+  sensor.configureDefault();
+  sensor.setScaling(SCALING);
+  sensor.setTimeout(100);
+
+  myservo.write(90);
 }
+
+//Global Variables
+int proximity = 0;
+int motorspeed = 50;
 
 void loop() {
   //Declare variables
@@ -90,7 +119,7 @@ void loop() {
 }
 
 void persue() {
-  
+  proximity = sensor.readRangeSingleMillimeters();
 }
 
 // PID control
