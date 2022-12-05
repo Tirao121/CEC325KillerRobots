@@ -10,10 +10,10 @@
 #include <SPI.h>
 #include "WiFiNINA.h"  // for A4-A7 and wifi/bluetooth
 #include <VL6180X.h>  // distance sensor library
+#include <PeakDetection.h>
 #include <Adafruit_NeoPixel.h> // NeoPixel library
 #include <PCA95x5.h>           // MUX library
 #include <Servo.h>             // Servo
-  // display libraries
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789 display
 
@@ -44,6 +44,7 @@ Servo myservo;
   // Display
   Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
   GFXcanvas16 canvas(240,135);
+PeakDetection peakDetection; // create PeakDetection object
 
 //Variables
 int mode = 0;
@@ -57,8 +58,7 @@ void setup() {
   delay(2000);
   Serial.println("Starting...");
 
-  myservo.attach(SERVO_PIN);
-
+  //Distance Sensor setup
  //I think we need this for the distance sensor -Jacob
   Wire.begin();
   muxU31.attach(Wire, 0x20);
@@ -66,21 +66,43 @@ void setup() {
   muxU31.direction(0x1CFF);  // 1 is input, see schematic to get upper and lower bytes
   muxU31.write(PCA95x5::Port::P09, PCA95x5::Level::H);  // enable VL6180 distance sensor
   //I think we need this for the distance sensor -Jacob
-
-  pinMode(BUZZ_PIN, OUTPUT);
-  pinMode(AIN1, OUTPUT);
-  pinMode(AIN2, OUTPUT);
-  pinMode(BIN1, OUTPUT);
-  pinMode(BIN2, OUTPUT);
-  pinMode(TFT_CS, OUTPUT);
-
-  // Distance sensor setup
   sensor.init();
   sensor.configureDefault();
   sensor.setScaling(SCALING);
   sensor.setTimeout(100);
 
-  myservo.write(90);
+  //NeoPixel setup
+  strip.begin();
+  strip.clear();  // Set all pixel values to zero
+  strip.show();   // Write values to the pixels
+
+  pinMode(BUZZ_PIN, OUTPUT);    //Buzzer setup
+  
+  //Servo Setup
+    //Distance sensor swivel
+    myservo.attach(SERVO_PIN);
+    myservo.write(90);
+    //Wheel servos
+    pinMode(AIN1, OUTPUT);
+    pinMode(AIN2, OUTPUT);
+    pinMode(BIN1, OUTPUT);
+    pinMode(BIN2, OUTPUT);
+
+  //Display setup (Must be after NeoPixels)
+  pinMode(TFT_CS, OUTPUT);
+  digitalWrite(TFT_CS, LOW); // disable TFT in case it was left running
+  tft.init(135, 240);           // Init ST7789 240x135
+  Serial.println("Display initialized");
+  tft.fillScreen(ST77XX_BLACK);
+  tft.setRotation(1);
+  tft.setCursor(0, 0);
+  tft.setTextColor(ST77XX_WHITE);
+  tft.setTextWrap(true);
+  tft.setTextSize(2);
+
+  //Peak detection setup
+  peakDetection.begin(75, 4, 0.025); // sets the lag, threshold and influence
+  peakDetection.setEpsilon(0.02);
 }
 
 //Global Variables
