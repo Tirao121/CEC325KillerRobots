@@ -135,7 +135,7 @@ void loop() {
          * tft
          * Buzzer
          */
-      //Add message to tft saying idle
+      //Add message to tft saying idle?
     break;
   }
 }
@@ -156,4 +156,16 @@ float pidControl(float error) {
   Serial.print(",");
   lastError = error;
   return(KP*error + (float)cumError + d);
+}
+
+void Alert(){
+  //Turn NeoPixels Red
+  for(int ii = 0; ii < NEO_COUNT; ii++) {
+    strip.setPixelColor(ii, strip.Color(255,0,0));
+  }
+  strip.show();
+    
+  //Buzzer
+
+  //tft
 }
