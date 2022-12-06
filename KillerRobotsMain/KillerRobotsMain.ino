@@ -193,10 +193,10 @@ void Alert(){
   //Neopixels
   for(int ii = 0; ii < NEO_COUNT; ii++) {
     if(alertToggle == 1){
-      strip.setPixelColor(ii, strip.Color(255,0,0)));
+      strip.setPixelColor(ii, strip.Color(255,0,0));
       }
       else{
-        strip.setPixelColor(ii, strip.Color(0,0,255)));
+        strip.setPixelColor(ii, strip.Color(0,0,255));
     }
   }
   strip.show();
