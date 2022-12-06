@@ -16,6 +16,10 @@
 #include <Servo.h>             // Servo
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789 display
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 //Pins & Defines
 #define RIGHT_BUTTON_PIN   A0
@@ -207,9 +211,6 @@ float pidControl(float error) {
 int alertToggle = 0;
 
 int attack(int victimAngle) {
-  if (IMU.accelerationAvailable()) {
-    float x,y,z;
-    IMU.readAcceleration(x, y, z);
 
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
