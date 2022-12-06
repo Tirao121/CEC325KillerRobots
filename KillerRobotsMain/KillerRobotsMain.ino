@@ -46,11 +46,8 @@ Servo myservo;
   GFXcanvas16 canvas(240,135);
 PeakDetection peakDetection; // create PeakDetection object
 
-//Global Variables
+//Variables
 int mode = 0;
-float proxThreshold = 100;
-float proximity = 0;
-int motorSpeed = 50;
   //PID Constants
   float KP = 4;  // proportional control gain
   float KI = .1; // integral gain
@@ -109,19 +106,21 @@ void setup() {
 }
 
 //Global Variables
-
-
+int proximity = 0;
+int motorspeed = 50;
+int angle = 90;       //swivel angle when change detected - default 90
+double data = 0.0;
 
 void loop() {
   //Declare variables
-
+  
   //Switch between different modes
   switch(mode) {
     case 1:   //Standby
-      //scan and detect
+      angle = standby();
       break;
     case 2:   //Only Alert
-      //Alert only, arrived at obstacle or cannot reach
+      //Alert only, Use PID to turn to swivel angle
       break;
     case 3:   //Chase or Attack
       //PID
@@ -143,6 +142,46 @@ void loop() {
   }
 }
 
+/* Detects change in radius, changes global var "mode" to alert if something detected
+  and returns current angle swivel is in. */
+double standby() {
+  //Detect change in proximity
+    //Use peak detect? Problem with swivel?
+    //detects wheels at 155 and 1 (margin of 1 degree)
+    //delay needed?
+  double pos = 0.0;
+  for (pos = 1; pos <= 155; pos += .5) {
+    int distance = sensor.readRangeSingleMillimeters();
+    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+      data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
+    float stdpt = peakDetection.add(data); // adds a new data point
+    int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
+    double filtered = peakDetection.getFilt(); // moving average
+    //Only negative peak - enters field, not move away
+    if(peak == -1) {
+      mode = 2;
+      return pos;
+    } else {
+      mode = 1;
+    }
+  }
+  for (pos = 1; pos <= 155; pos -= .5) {
+    int distance = sensor.readRangeSingleMillimeters();
+    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+      data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
+    float stdpt = peakDetection.add(data); // adds a new data point
+    int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
+    double filtered = peakDetection.getFilt(); // moving average
+    //Only negative peak - enters field, not move away
+    if(peak == -1) {
+      mode = 2;
+      return pos;
+    } else {
+      mode = 1;
+    }
+  }  
+  
+}
 // PID control
 float pidControl(float error) {
   static float cumError = 0.0;
