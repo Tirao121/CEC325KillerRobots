@@ -46,8 +46,11 @@ Servo myservo;
   GFXcanvas16 canvas(240,135);
 PeakDetection peakDetection; // create PeakDetection object
 
-//Variables
+//Global Variables
 int mode = 0;
+float proxThreshold = 100;
+float proximity = 0;
+int motorSpeed = 50;
   //PID Constants
   float KP = 4;  // proportional control gain
   float KI = .1; // integral gain
@@ -106,8 +109,8 @@ void setup() {
 }
 
 //Global Variables
-int proximity = 0;
-int motorspeed = 50;
+
+
 
 void loop() {
   //Declare variables
@@ -140,10 +143,6 @@ void loop() {
   }
 }
 
-void attack() {
-  proximity = sensor.readRangeSingleMillimeters();
-}
-
 // PID control
 float pidControl(float error) {
   static float cumError = 0.0;
@@ -156,6 +155,12 @@ float pidControl(float error) {
   Serial.print(",");
   lastError = error;
   return(KP*error + (float)cumError + d);
+}
+
+int attack(int victimAngle) {
+  proximity = sensor.readRangeSingleMillimeters();
+  float error = proximity-proxThreshold;
+  motorSpeed = pidControl(error);
 }
 
 void Alert(){
