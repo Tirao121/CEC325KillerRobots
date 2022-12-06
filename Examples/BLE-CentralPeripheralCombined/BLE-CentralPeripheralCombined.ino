@@ -14,32 +14,38 @@
   This example code is in the public domain.
 */
 
-#include <ArduinoBLE.h>
+#include <ArduinoBLE.h> //Bluetooth Low Energy library
+#include <VL6180X.h>  // distance sensor library
+#include <PCA95x5.h>           // MUX library
 
 //----------------------------------------------------------------------------------------------------------------------
 // BLE UUIDs
 //----------------------------------------------------------------------------------------------------------------------
 #define BLE_UUID_PERIPHERAL          "c87dd0eb-290a-4df5-ba37-ca7b9418b205"
 #define BLE_UUID_LED                 "c87dd0eb-290a-4df5-ba37-ca7b9418b206"
-#define BLE_UUID_BUTTON              "c87dd0eb-290a-4df5-ba37-ca7b9418b207"
+#define BLE_UUID_DISTANCE              "c87dd0eb-290a-4df5-ba37-ca7b9418b207"
 
 BLEService ledService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy LED Service
 
 // Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEIntCharacteristic LEDCharacteristic(BLE_UUID_LED, BLERead | BLEWrite);
 // create button characteristic and allow remote device to get notifications
-BLEIntCharacteristic buttonCharacteristic(BLE_UUID_BUTTON, BLERead | BLENotify);
+BLEIntCharacteristic distanceCharacteristic(BLE_UUID_DISTANCE, BLERead | BLENotify);
 
 // define which device this is
 #define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
 char* robotName = "KROS"; //Don't change
 
-// variables for button
-#define RIGHT_BUTTON_PIN   A0
+// variables for buzz pin, led pin, and distance
 #define BUZZ_PIN           2
-const int buttonPin = RIGHT_BUTTON_PIN;
 const int ledPin = LED_BUILTIN;
-int oldButtonState = HIGH;
+int oldDistance = 756;
+
+#define SCALING 3
+
+  // objects for the VL6180X TOF distance sensor
+  VL6180X sensor;      // distance sensor object
+  PCA9535 muxU31;      // MUX object for U31 PCA9535
 
 void setup() {
   Serial.begin(115200);
@@ -47,8 +53,20 @@ void setup() {
 
   // set LED pin to output mode
   pinMode(ledPin, OUTPUT);
-  pinMode(buttonPin, INPUT); // use button pin as an input
   pinMode(BUZZ_PIN, OUTPUT);
+
+  //Distance Sensor setup
+ //I think we need this for the distance sensor -Jacob
+  Wire.begin();
+  muxU31.attach(Wire, 0x20);
+  muxU31.polarity(PCA95x5::Polarity::ORIGINAL_ALL);
+  muxU31.direction(0x1CFF);  // 1 is input, see schematic to get upper and lower bytes
+  muxU31.write(PCA95x5::Port::P09, PCA95x5::Level::H);  // enable VL6180 distance sensor
+  //I think we need this for the distance sensor -Jacob
+  sensor.init();
+  sensor.configureDefault();
+  sensor.setScaling(SCALING);
+  sensor.setTimeout(100);
 
   // begin initialization
   if (!BLE.begin()) {
@@ -68,14 +86,14 @@ void setup() {
 
     // add the characteristic to the service
     ledService.addCharacteristic(LEDCharacteristic);
-    ledService.addCharacteristic(buttonCharacteristic);
+    ledService.addCharacteristic(distanceCharacteristic);
 
     // add service
     BLE.addService(ledService);
 
     // set the initial value for the characeristic:
     LEDCharacteristic.writeValue(0);
-    buttonCharacteristic.writeValue(1);
+    distanceCharacteristic.writeValue(756);
   
     // start advertising
     BLE.advertise();
@@ -103,15 +121,15 @@ void loop() {
 
       // while the central is still connected to peripheral:
       while (central.connected()) {
-        // read the current button pin state
-        char buttonValue = digitalRead(buttonPin);
+        // read the current distance
+        char distanceValue = sensor.readRangeSingleMillimeters();
     
         // has the value changed since the last read
-        bool buttonChanged = (buttonCharacteristic.value() != buttonValue);
+        bool distanceChanged = (distanceCharacteristic.value() != distanceValue);
     
-        if (buttonChanged) {
+        if (distanceChanged) {
           // button state changed, update characteristics
-          buttonCharacteristic.writeValue(buttonValue);
+          distanceCharacteristic.writeValue(distanceValue);
         }
 
         // if the remote device wrote to the characteristic,
@@ -190,7 +208,7 @@ void loop() {
   // retrieve the LED characteristic
   BLECharacteristic ledCharacteristic = peripheral.characteristic(BLE_UUID_LED);
   // retrieve the Button characteristic
-  BLECharacteristic buttonCharacteristic = peripheral.characteristic(BLE_UUID_BUTTON);
+  BLECharacteristic distanceCharacteristic = peripheral.characteristic(BLE_UUID_DISTANCE);
 
   if (!ledCharacteristic) {
     Serial.println("Peripheral does not have LED characteristic!");
@@ -204,56 +222,56 @@ void loop() {
     Serial.println("Connected to LED characteristic");
   }
 
-  if (!buttonCharacteristic) {
-    Serial.println("Peripheral does not have button characteristic!");
+  if (!distanceCharacteristic) {
+    Serial.println("Peripheral does not have distance characteristic!");
     peripheral.disconnect();
     return;
-  } else if (!buttonCharacteristic.canRead()) {
-    Serial.println("Peripheral does not have a readable button characteristic!");
+  } else if (!distanceCharacteristic.canRead()) {
+    Serial.println("Peripheral does not have a readable distance characteristic!");
     peripheral.disconnect();
     return;
-  } else if (!buttonCharacteristic.canSubscribe()) {
-    Serial.println("Peripheral does not allow button subscriptions (notify)");
-  } else if(!buttonCharacteristic.subscribe()) {
+  } else if (!distanceCharacteristic.canSubscribe()) {
+    Serial.println("Peripheral does not allow distance subscriptions (notify)");
+  } else if(!distanceCharacteristic.subscribe()) {
     Serial.println("Subscription failed!");
   } else {
-    Serial.println("Connected to button characteristic");
+    Serial.println("Connected to distance characteristic");
   }
 
   while (peripheral.connected()) {
     // while the peripheral is connected
 
-    // read the button pin
-    int buttonState = digitalRead(buttonPin);
+    // read the distance
+    int distanceState = sensor.readRangeSingleMillimeters();
 
-    if (oldButtonState != buttonState) {
-      // button changed
-      oldButtonState = buttonState;
+    if (oldDistance != distanceState) {
+      // distance changed
+      oldDistance = distanceState;
 
-      if (!buttonState) {
-        Serial.println("button pressed");
+      if (!distanceState) {
+        Serial.println("Distance changed");
 
         // button is pressed, write 0x01 to turn the LED on
         ledCharacteristic.writeValue((byte)0x01);
       } else {
-        Serial.println("button released");
+        Serial.println("Distance changed");
 
         // button is released, write 0x00 to turn the LED off
         ledCharacteristic.writeValue((byte)0x00);
       }
     }
-        if(buttonCharacteristic && buttonCharacteristic.canRead() && buttonCharacteristic.valueUpdated()) {
-      int peripheralButtonState;
-      buttonCharacteristic.readValue(&peripheralButtonState, sizeof(int));
-      if(!peripheralButtonState) {
+        if(distanceCharacteristic && distanceCharacteristic.canRead() && distanceCharacteristic.valueUpdated()) {
+      int peripheralDistance;
+      distanceCharacteristic.readValue(&peripheralDistance, sizeof(int));
+      if(!peripheralDistance) {
         digitalWrite(ledPin, HIGH);
         tone(BUZZ_PIN, 1000);
       } else {
         digitalWrite(ledPin, LOW);
         noTone(BUZZ_PIN);
       }
-      Serial.print("peripheralButtonState = ");
-      Serial.println(peripheralButtonState);
+      Serial.print("peripheralDistance = ");
+      Serial.println(peripheralDistance);
     }
 
   }
