@@ -149,6 +149,11 @@ double standby() {
     //Use peak detect? Problem with swivel?
     //detects wheels at 155 and 1 (margin of 1 degree)
     //delay needed?
+  //Freeze wheels
+  analogWrite(AIN1, 0);
+  analogWrite(AIN2, 0);
+  analogWrite(BIN1, 0);
+  analogWrite(BIN2, 0);
   double pos = 0.0;
   for (pos = 1; pos <= 155; pos += .5) {
     int distance = sensor.readRangeSingleMillimeters();
