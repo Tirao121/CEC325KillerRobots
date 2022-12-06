@@ -152,10 +152,9 @@ void loop() {
   if (IMU.accelerationAvailable()) {
     float x,y,z;
     IMU.readAcceleration(x, y, z);
-    serial.println(x " ," y " ," z);
-
+  
     dispStr += "Angle Reading: ";
-    dispStr += y;
+    dispStr += z;
     dispStr += "\n";
   
     dispStr += "Target: ";
