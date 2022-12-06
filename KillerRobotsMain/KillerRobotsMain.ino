@@ -120,12 +120,12 @@ void loop() {
     case 1:   //Standby
       //scan and detect
       break;
-    case 2:   //Chase or Attack
+    case 2:   //Only Alert
+      //Alert only, arrived at obstacle or cannot reach
+      break;
+    case 3:   //Chase or Attack
       //PID
       //Alert function
-      break;
-    case 3:   //Only Alert
-      //Alert only, arrived at obstacle or cannot reach
       break;
     case 4:   //Withdraw
       //After 5s or so, withdraw from target
@@ -157,6 +157,9 @@ float pidControl(float error) {
   return(KP*error + (float)cumError + d);
 }
 
+//attack function - must be called continuously in order to work
+int alertToggle = 0;
+
 int attack(int victimAngle) {
   proximity = sensor.readRangeSingleMillimeters();
   float error = proximity-proxThreshold;
@@ -164,13 +167,40 @@ int attack(int victimAngle) {
 }
 
 void Alert(){
-  //Turn NeoPixels Red
+  //Buzzer 
+  if(alertToggle == 1){
+    tone(BUZZ_PIN, 466.16, 150);
+    alertToggle = 0;
+  }
+  else{
+    tone(BUZZ_PIN, 200, 150);
+    alertToggle = 1;
+  }
+
+  //Neopixels
   for(int ii = 0; ii < NEO_COUNT; ii++) {
-    strip.setPixelColor(ii, strip.Color(255,0,0));
+    strip.setPixelColor(ii, strip.Color(255*alertToggle,0,255*(abs(alertToggle-1))));
   }
   strip.show();
-    
-  //Buzzer
 
-  //tft
+  //display
+  tft.fillScreen(ST77XX_BLACK);
+  tft.setCursor(0, 10);
+  tft.setTextColor(ST77XX_WHITE);
+  tft.setTextWrap(false);
+  tft.setTextSize(2);
+  tft.print(" _                   _");
+  tft.println(" _( )                 ( )_");
+  tft.println("(_, |      __ __      | ,_)");
+  tft.println("   \'\    /  ^  \    /'/");
+  tft.println("    '\'\,/\      \,/'/'");
+  tft.println("      '\| []   [] |/'");
+  tft.println("        (_  /^\  _)");
+  tft.println("          \  ~  /");
+  tft.println("          /HHHHH\");
+  tft.println("        /'/{^^^}\'\");
+  tft.println("    _,/'/'  ^^^  '\'\,_");
+  tft.println("   (_, |           | ,_)");
+  tft.println("     (_)           (_)");
+
 }
