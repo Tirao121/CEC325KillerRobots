@@ -20,6 +20,10 @@
 #include <Servo.h>             // Servo
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789 display
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 //Pins & Defines
 #define RIGHT_BUTTON_PIN   A0
@@ -53,6 +57,7 @@ PeakDetection peakDetection; // create PeakDetection object
 
 //Variables
 int mode = 0;
+double proxThreashold = 100;
   //PID Constants
   float KP = 4;  // proportional control gain
   float KI = .1; // integral gain
@@ -123,7 +128,7 @@ void loop() {
   switch(mode) {
     case 1:   //Standby
       angle = standby();
-      attack()
+      attack();
       break;
     case 2:   //Only Alert
       //Alert only, Use PID to turn to swivel angle, does not change modes until 
@@ -213,7 +218,6 @@ float pidControl(float error) {
 int alertToggle = 0;
 
 void attack() {
-
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
   motorSpeed = pidControl(distanceError);
