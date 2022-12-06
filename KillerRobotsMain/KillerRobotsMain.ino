@@ -121,7 +121,8 @@ void loop() {
       angle = standby();
       break;
     case 2:   //Only Alert
-      //Alert only, Use PID to turn to swivel angle
+      //Alert only, Use PID to turn to swivel angle, does not change modes until 
+        //other robot detects change too
       break;
     case 3:   //Chase or Attack
       //PID
@@ -150,6 +151,7 @@ double standby() {
     //Use peak detect? Problem with swivel?
     //detects wheels at 155 and 1 (margin of 1 degree)
     //delay needed?
+    //have detect peak for multiple values first?
   //Freeze wheels
   analogWrite(AIN1, 0);
   analogWrite(AIN2, 0);
