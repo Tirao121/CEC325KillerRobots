@@ -20,10 +20,6 @@
 #include <Servo.h>             // Servo
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789 display
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
 //Pins & Defines
 #define RIGHT_BUTTON_PIN   A0
@@ -308,7 +304,7 @@ void idle(){
      }else {
       digitalWrite(ledPin, LOW);    
      }
-    i++
+    i++;
   }
        
 }
