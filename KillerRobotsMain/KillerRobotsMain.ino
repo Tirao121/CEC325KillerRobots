@@ -46,8 +46,11 @@ Servo myservo;
   GFXcanvas16 canvas(240,135);
 PeakDetection peakDetection; // create PeakDetection object
 
-//Variables
+//Global Variables
 int mode = 0;
+float proxThreshold = 100;
+float proximity = 0;
+int motorSpeed = 50;
   //PID Constants
   float KP = 4;  // proportional control gain
   float KI = .1; // integral gain
@@ -106,8 +109,8 @@ void setup() {
 }
 
 //Global Variables
-int proximity = 0;
-int motorspeed = 50;
+
+
 
 void loop() {
   //Declare variables
@@ -140,10 +143,6 @@ void loop() {
   }
 }
 
-void attack() {
-  proximity = sensor.readRangeSingleMillimeters();
-}
-
 // PID control
 float pidControl(float error) {
   static float cumError = 0.0;
@@ -160,6 +159,26 @@ float pidControl(float error) {
 
 //attack function - must be called continuously in order to work
 int alertToggle = 0;
+
+int attack(int victimAngle) {
+  proximity = sensor.readRangeSingleMillimeters();
+  float error = proximity-proxThreshold;
+  motorSpeed = pidControl(error);
+
+    int absSpeed = abs(motorSpeed);
+  if(motorSpeed > 0) {
+    analogWrite(AIN1, absSpeed);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, absSpeed);
+  } else {
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, absSpeed);
+    analogWrite(BIN1, absSpeed);
+    analogWrite(BIN2, 0);
+  }
+}
+
 void Alert(){
   //Buzzer 
   if(alertToggle == 1){
@@ -173,7 +192,12 @@ void Alert(){
 
   //Neopixels
   for(int ii = 0; ii < NEO_COUNT; ii++) {
-    strip.setPixelColor(ii, strip.Color(255*alertToggle,0,255*(abs(alertToggle-1))));
+    if(alertToggle == 1){
+      strip.setPixelColor(ii, strip.Color(255,0,0));
+      }
+      else{
+        strip.setPixelColor(ii, strip.Color(0,0,255));
+    }
   }
   strip.show();
 
@@ -182,7 +206,7 @@ void Alert(){
   tft.setCursor(0, 10);
   tft.setTextColor(ST77XX_WHITE);
   tft.setTextWrap(false);
-  tft.setTextSize(2);
+  tft.setTextSize(1);
   tft.print(" _                   _");
   tft.println(" _( )                 ( )_");
   tft.println("(_, |      __ __      | ,_)");
@@ -191,8 +215,8 @@ void Alert(){
   tft.println("      '\| []   [] |/'");
   tft.println("        (_  /^\  _)");
   tft.println("          \  ~  /");
-  tft.println("          /HHHHH\");
-  tft.println("        /'/{^^^}\'\");
+  tft.println("          /HHHHH\\");
+  tft.println("        /'/{^^^}\'\ ");
   tft.println("    _,/'/'  ^^^  '\'\,_");
   tft.println("   (_, |           | ,_)");
   tft.println("     (_)           (_)");
