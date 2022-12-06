@@ -16,7 +16,6 @@
 #include <Servo.h>             // Servo
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789 display
-#include <Arduino_LSM6DSOX.h>
 
 //Pins & Defines
 #define RIGHT_BUTTON_PIN   A0
@@ -272,4 +271,19 @@ void Alert(){
   tft.println("   (_, |           | ,_)");
   tft.println("     (_)           (_)");
 
+}
+
+void withdraw() { 
+  //waits for 5 seconds
+  //slowly backs away while silencing buzzers, blink lights?
+  //ends with turning off lights and returning to standby mode
+  mode = 1;
+}
+
+void idle() {
+  //lights
+  //buzzer
+  //tft
+  //servos
+  //flashing led
 }
