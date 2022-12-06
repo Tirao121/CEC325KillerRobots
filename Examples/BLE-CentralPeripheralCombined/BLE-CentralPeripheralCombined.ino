@@ -33,7 +33,7 @@ BLEIntCharacteristic LEDCharacteristic(BLE_UUID_LED, BLERead | BLEWrite);
 BLEIntCharacteristic distanceCharacteristic(BLE_UUID_DISTANCE, BLERead | BLENotify);
 
 // define which device this is
-#define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
+#define setPeripheral 1   //Can change: 1 is peripheral, 0 is central
 char* robotName = "KROS"; //Don't change
 
 // variables for buzz pin, led pin, and distance
@@ -50,6 +50,10 @@ int oldDistance = 756;
 void setup() {
   Serial.begin(115200);
   delay(3000);
+
+  while (!Serial) {
+    
+  }
 
   // set LED pin to output mode
   pinMode(ledPin, OUTPUT);
@@ -246,7 +250,7 @@ void loop() {
 
     if (oldDistance != distanceState) {
       // distance changed
-      bool distanceChanged = ((signed)distanceCharacteristic.value() != distanceState);
+      bool distanceChanged = ((signed)distanceCharacteristic.value() != distanceState);  //May be wrong logic
       oldDistance = distanceState;
 
       if (!distanceChanged) {
@@ -264,7 +268,7 @@ void loop() {
         if(distanceCharacteristic && distanceCharacteristic.canRead() && distanceCharacteristic.valueUpdated()) {
       int peripheralDistance;
       distanceCharacteristic.readValue(&peripheralDistance, sizeof(int));
-      bool distanceChanged = ((signed)distanceCharacteristic.value() != peripheralDistance);
+      bool distanceChanged = ((signed)distanceCharacteristic.value() != peripheralDistance);  //May be wrong logic
       if(!peripheralDistance) {                                             //If it has changed then do something
         digitalWrite(ledPin, HIGH);
         tone(BUZZ_PIN, 1000);

@@ -200,9 +200,13 @@ float pidControl(float error) {
 int alertToggle = 0;
 
 int attack(int victimAngle) {
+  if (IMU.accelerationAvailable()) {
+    float x,y,z;
+    IMU.readAcceleration(x, y, z);
+
   proximity = sensor.readRangeSingleMillimeters();
-  float error = proximity-proxThreshold;
-  motorSpeed = pidControl(error);
+  float distanceError = proximity-proxThreshold;
+  motorSpeed = pidControl(distanceError);
 
     int absSpeed = abs(motorSpeed);
   if(motorSpeed > 0) {
