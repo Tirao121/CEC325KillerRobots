@@ -140,7 +140,7 @@ void loop() {
   }
 }
 
-void pursue() {
+void attack() {
   proximity = sensor.readRangeSingleMillimeters();
 }
 
