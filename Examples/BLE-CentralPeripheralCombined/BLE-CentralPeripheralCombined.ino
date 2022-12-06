@@ -128,12 +128,12 @@ void loop() {
         bool distanceChanged = (distanceCharacteristic.value() != distanceValue);
     
         if (distanceChanged) {
-          // button state changed, update characteristics
+          // distance changed, update characteristics
           distanceCharacteristic.writeValue(distanceValue);
         }
 
         // if the remote device wrote to the characteristic,
-        // use the value to control the LED:
+        // use the value to control the LED: Can change to alert function
         if (LEDCharacteristic.written()) {
           if (LEDCharacteristic.value()) {   // any value other than 0
             Serial.println("LED on");
@@ -246,9 +246,10 @@ void loop() {
 
     if (oldDistance != distanceState) {
       // distance changed
+      bool distanceChanged = ((signed)distanceCharacteristic.value() != distanceState);
       oldDistance = distanceState;
 
-      if (!distanceState) {
+      if (!distanceChanged) {
         Serial.println("Distance changed");
 
         // button is pressed, write 0x01 to turn the LED on
@@ -263,10 +264,11 @@ void loop() {
         if(distanceCharacteristic && distanceCharacteristic.canRead() && distanceCharacteristic.valueUpdated()) {
       int peripheralDistance;
       distanceCharacteristic.readValue(&peripheralDistance, sizeof(int));
-      if(!peripheralDistance) {
+      bool distanceChanged = ((signed)distanceCharacteristic.value() != peripheralDistance);
+      if(!peripheralDistance) {                                             //If it has changed then do something
         digitalWrite(ledPin, HIGH);
         tone(BUZZ_PIN, 1000);
-      } else {
+      } else {                                                              //If distance hasn't changed then stop doing the stuff
         digitalWrite(ledPin, LOW);
         noTone(BUZZ_PIN);
       }
