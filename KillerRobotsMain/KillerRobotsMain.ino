@@ -1,8 +1,12 @@
 /*
- * Filename:
- * Purpose:
+ * Filename: KillerRobotsMain
+ * Purpose: Sentinal Robots designed to detect and 'attack' intruders
  * 
  * Contributors:
+ * Peter Schmitt
+ * Rita Tagarao
+ * Logan Setzkorn
+ * Jacob Block 
  * Date:
  */
 
@@ -31,6 +35,7 @@
 #define TFT_CS            4  // display chip select
 #define TFT_RST           A3 // display reset
 #define TFT_DC            3  // display D/C
+const int ledPin = LED_BUILTIN;
 
 #define SCALING 3
 
@@ -280,10 +285,29 @@ void withdraw() {
   mode = 1;
 }
 
-void idle() {
+void idle(){
   //lights
+  strip.clear();
   //buzzer
+  noTone(BUZZ_PIN);
   //tft
+  digitalWrite(TFT_CS, LOW);
   //servos
+    myservo.write(90);
+    //Wheel servos
+    pinMode(AIN1, INPUT);
+    pinMode(AIN2, INPUT);
+    pinMode(BIN1, INPUT);
+    pinMode(BIN2, INPUT);
   //flashing led
+  int i = 0;
+  while(true){
+    if(i % 2 == 0){
+      digitalWrite(ledPin, HIGH);
+     }else {
+      digitalWrite(ledPin, LOW);    
+     }
+    i++
+  }
+       
 }
