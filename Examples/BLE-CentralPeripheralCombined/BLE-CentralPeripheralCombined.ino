@@ -51,6 +51,10 @@ void setup() {
   Serial.begin(115200);
   delay(3000);
 
+  while (!Serial) {
+    
+  }
+
   // set LED pin to output mode
   pinMode(ledPin, OUTPUT);
   pinMode(BUZZ_PIN, OUTPUT);
