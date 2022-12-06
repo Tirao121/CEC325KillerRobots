@@ -164,6 +164,19 @@ int attack(int victimAngle) {
   proximity = sensor.readRangeSingleMillimeters();
   float error = proximity-proxThreshold;
   motorSpeed = pidControl(error);
+
+    int absSpeed = abs(motorSpeed);
+  if(motorSpeed > 0) {
+    analogWrite(AIN1, absSpeed);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, absSpeed);
+  } else {
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, absSpeed);
+    analogWrite(BIN1, absSpeed);
+    analogWrite(BIN2, 0);
+  }
 }
 
 void Alert(){
