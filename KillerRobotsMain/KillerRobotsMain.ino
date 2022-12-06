@@ -123,6 +123,7 @@ void loop() {
   switch(mode) {
     case 1:   //Standby
       angle = standby();
+      attack()
       break;
     case 2:   //Only Alert
       //Alert only, Use PID to turn to swivel angle, does not change modes until 
@@ -211,7 +212,7 @@ float pidControl(float error) {
 //attack function - must be called continuously in order to work
 int alertToggle = 0;
 
-int attack(int victimAngle) {
+void attack() {
 
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
@@ -307,4 +308,22 @@ void idle(){
     i++;
   }
        
+}
+
+void turn(double victimAngle) {
+  if (victimAngle < 90) {
+  analogWrite(BIN2, 255/2); //R forward
+  analogWrite(AIN1, 0); //L forward
+  analogWrite(AIN2, 0); //L back
+  analogWrite(BIN1, 0); //R back
+  delay(victimAngle * (76/9)); //angle multiplied by 76/9
+  }
+  if (victimAngle > 90) {
+  analogWrite(BIN2, 0); //R forward
+  analogWrite(AIN1, 255/2); //L forward
+  analogWrite(AIN2, 0); //L back
+  analogWrite(BIN1, 0); //R back
+  delay(victimAngle * (76/9)); //angle multiplied by 76/9
+  }
+
 }
