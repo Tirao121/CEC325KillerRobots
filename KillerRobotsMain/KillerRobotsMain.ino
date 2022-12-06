@@ -192,7 +192,12 @@ void Alert(){
 
   //Neopixels
   for(int ii = 0; ii < NEO_COUNT; ii++) {
-    strip.setPixelColor(ii, strip.Color(255*alertToggle,0,255*(abs(alertToggle-1))));
+    if(alertToggle == 1){
+      strip.setPixelColor(ii, strip.Color(255,0,0)));
+      }
+      else{
+        strip.setPixelColor(ii, strip.Color(0,0,255)));
+    }
   }
   strip.show();
 
@@ -201,7 +206,7 @@ void Alert(){
   tft.setCursor(0, 10);
   tft.setTextColor(ST77XX_WHITE);
   tft.setTextWrap(false);
-  tft.setTextSize(2);
+  tft.setTextSize(1);
   tft.print(" _                   _");
   tft.println(" _( )                 ( )_");
   tft.println("(_, |      __ __      | ,_)");
@@ -210,8 +215,8 @@ void Alert(){
   tft.println("      '\| []   [] |/'");
   tft.println("        (_  /^\  _)");
   tft.println("          \  ~  /");
-  tft.println("          /HHHHH\");
-  tft.println("        /'/{^^^}\'\");
+  tft.println("          /HHHHH\\");
+  tft.println("        /'/{^^^}\'\ ");
   tft.println("    _,/'/'  ^^^  '\'\,_");
   tft.println("   (_, |           | ,_)");
   tft.println("     (_)           (_)");
