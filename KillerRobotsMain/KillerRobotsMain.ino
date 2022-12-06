@@ -158,15 +158,43 @@ float pidControl(float error) {
   return(KP*error + (float)cumError + d);
 }
 
-int Alert(){
-  //Turn NeoPixels Red
+//attack function - must be called continuously in order to work
+int alertToggle = 0;
+void Alert(){
+  //Buzzer 
+  if(alertToggle == 1){
+    tone(BUZZ_PIN, 466.16, 150);
+    alertToggle = 0;
+  }
+  else{
+    tone(BUZZ_PIN, 200, 150);
+    alertToggle = 1;
+  }
+
+  //Neopixels
   for(int ii = 0; ii < NEO_COUNT; ii++) {
-    strip.setPixelColor(ii, strip.Color(255,0,0));
+    strip.setPixelColor(ii, strip.Color(255*alertToggle,0,255*(abs(alertToggle-1))));
   }
   strip.show();
-    
-  //Buzzer
 
-  //tft
-  return 1;
+  //display
+  tft.fillScreen(ST77XX_BLACK);
+  tft.setCursor(0, 10);
+  tft.setTextColor(ST77XX_WHITE);
+  tft.setTextWrap(false);
+  tft.setTextSize(2);
+  tft.print(" _                   _");
+  tft.println(" _( )                 ( )_");
+  tft.println("(_, |      __ __      | ,_)");
+  tft.println("   \'\    /  ^  \    /'/");
+  tft.println("    '\'\,/\      \,/'/'");
+  tft.println("      '\| []   [] |/'");
+  tft.println("        (_  /^\  _)");
+  tft.println("          \  ~  /");
+  tft.println("          /HHHHH\");
+  tft.println("        /'/{^^^}\'\");
+  tft.println("    _,/'/'  ^^^  '\'\,_");
+  tft.println("   (_, |           | ,_)");
+  tft.println("     (_)           (_)");
+
 }
