@@ -117,12 +117,12 @@ void loop() {
     case 1:   //Standby
       //scan and detect
       break;
-    case 2:   //Chase or Attack
+    case 2:   //Only Alert
+      //Alert only, arrived at obstacle or cannot reach
+      break;
+    case 3:   //Chase or Attack
       //PID
       //Alert function
-      break;
-    case 3:   //Only Alert
-      //Alert only, arrived at obstacle or cannot reach
       break;
     case 4:   //Withdraw
       //After 5s or so, withdraw from target
@@ -158,7 +158,7 @@ float pidControl(float error) {
   return(KP*error + (float)cumError + d);
 }
 
-void Alert(){
+int Alert(){
   //Turn NeoPixels Red
   for(int ii = 0; ii < NEO_COUNT; ii++) {
     strip.setPixelColor(ii, strip.Color(255,0,0));
@@ -168,4 +168,5 @@ void Alert(){
   //Buzzer
 
   //tft
+  return 1;
 }
