@@ -3,6 +3,8 @@
 
   This sets up a device to read and listen to a button press 
   and then turns on an LED and plays a noise on a seperate device when the button is pressed
+  Communication works both ways so if a button is pressed on one device the other device activates, no matter
+  which is central and which is peripheral
 
   Killer Robots from Outer Space (KROS)
   Peter Schmitt, Rita Tagarao, Logan Setzkorn, Jacob Block 
@@ -24,9 +26,9 @@
 BLEService ledService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy LED Service
 
 // Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
-BLEByteCharacteristic LEDCharacteristic(BLE_UUID_LED, BLERead | BLEWrite);
+BLEIntCharacteristic LEDCharacteristic(BLE_UUID_LED, BLERead | BLEWrite);
 // create button characteristic and allow remote device to get notifications
-BLEByteCharacteristic buttonCharacteristic(BLE_UUID_BUTTON, BLERead | BLENotify);
+BLEIntCharacteristic buttonCharacteristic(BLE_UUID_BUTTON, BLERead | BLENotify);
 
 // define which device this is
 #define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
@@ -118,9 +120,10 @@ void loop() {
           if (LEDCharacteristic.value()) {   // any value other than 0
             Serial.println("LED on");
             digitalWrite(ledPin, HIGH);         // will turn the LED on
-            tone(BUZZ_PIN, 500, 100);
+            tone(BUZZ_PIN, 500);
           } else {                              // a 0 value
             Serial.println(F("LED off"));
+            noTone(BUZZ_PIN);
             digitalWrite(ledPin, LOW);          // will turn the LED off
           }
         }
@@ -240,8 +243,8 @@ void loop() {
       }
     }
         if(buttonCharacteristic && buttonCharacteristic.canRead() && buttonCharacteristic.valueUpdated()) {
-      byte peripheralButtonState;
-      buttonCharacteristic.readValue(peripheralButtonState);
+      int peripheralButtonState;
+      buttonCharacteristic.readValue(&peripheralButtonState, sizeof(int));
       if(!peripheralButtonState) {
         digitalWrite(ledPin, HIGH);
         tone(BUZZ_PIN, 1000);
