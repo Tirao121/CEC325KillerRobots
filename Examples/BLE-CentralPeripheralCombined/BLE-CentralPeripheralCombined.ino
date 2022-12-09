@@ -14,38 +14,33 @@
   This example code is in the public domain.
 */
 
+//Libraries
+
 #include <ArduinoBLE.h> //Bluetooth Low Energy library
-#include <VL6180X.h>  // distance sensor library
-#include <PCA95x5.h>           // MUX library
 
 //----------------------------------------------------------------------------------------------------------------------
 // BLE UUIDs
 //----------------------------------------------------------------------------------------------------------------------
 #define BLE_UUID_PERIPHERAL          "c87dd0eb-290a-4df5-ba37-ca7b9418b205"
-#define BLE_UUID_LED                 "c87dd0eb-290a-4df5-ba37-ca7b9418b206"
-#define BLE_UUID_DISTANCE              "c87dd0eb-290a-4df5-ba37-ca7b9418b207"
+#define BLE_UUID_MODE              "c87dd0eb-290a-4df5-ba37-ca7b9418b207"
 
-BLEService ledService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy LED Service
+BLEService modeService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy Mode Service
 
-// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
-BLEIntCharacteristic LEDCharacteristic(BLE_UUID_LED, BLERead | BLEWrite);
-// create button characteristic and allow remote device to get notifications
-BLEIntCharacteristic distanceCharacteristic(BLE_UUID_DISTANCE, BLERead | BLENotify);
+// create mode characteristic and allow remote device to get notifications
+BLEIntCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLENotify);
+
+//Pins & Defines, will not be needed eventually
+#define BUZZ_PIN           2
 
 // define which device this is
-#define setPeripheral 1   //Can change: 1 is peripheral, 0 is central
+#define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
 char* robotName = "KROS"; //Don't change
 
-// variables for buzz pin, led pin, and distance
-#define BUZZ_PIN           2
-const int ledPin = LED_BUILTIN;
-int oldDistance = 756;
+// variables for bluetooth
+int oldMode = 0;
 
-#define SCALING 3
-
-  // objects for the VL6180X TOF distance sensor
-  VL6180X sensor;      // distance sensor object
-  PCA9535 muxU31;      // MUX object for U31 PCA9535
+//Variables
+int mode = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -55,55 +50,40 @@ void setup() {
     
   }
 
-  // set LED pin to output mode
-  pinMode(ledPin, OUTPUT);
-  pinMode(BUZZ_PIN, OUTPUT);
+  pinMode(BUZZ_PIN, OUTPUT);    //Buzzer setup
 
-  //Distance Sensor setup
- //I think we need this for the distance sensor -Jacob
-  Wire.begin();
-  muxU31.attach(Wire, 0x20);
-  muxU31.polarity(PCA95x5::Polarity::ORIGINAL_ALL);
-  muxU31.direction(0x1CFF);  // 1 is input, see schematic to get upper and lower bytes
-  muxU31.write(PCA95x5::Port::P09, PCA95x5::Level::H);  // enable VL6180 distance sensor
-  //I think we need this for the distance sensor -Jacob
-  sensor.init();
-  sensor.configureDefault();
-  sensor.setScaling(SCALING);
-  sensor.setTimeout(100);
-
-  // begin initialization
+  // begin Bluetooth initialization
   if (!BLE.begin()) {
     Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
   else {
-    Serial.println("Bluetooth® Low Energy Central - LED control");
+    Serial.println("Bluetooth® Low Energy Central - Mode control");
   }
 
+  //if peripheral device
   if (setPeripheral == 1) {
    // set advertised local name and service UUID:
     BLE.setDeviceName(robotName);
     BLE.setLocalName(robotName);
-    BLE.setAdvertisedService(ledService);
+    BLE.setAdvertisedService(modeService);
 
     // add the characteristic to the service
-    ledService.addCharacteristic(LEDCharacteristic);
-    ledService.addCharacteristic(distanceCharacteristic);
+    modeService.addCharacteristic(modeCharacteristic);
 
     // add service
-    BLE.addService(ledService);
+    BLE.addService(modeService);
 
     // set the initial value for the characeristic:
-    LEDCharacteristic.writeValue(0);
-    distanceCharacteristic.writeValue(756);
+    modeCharacteristic.writeValue(1);
   
     // start advertising
     BLE.advertise();
 
-    Serial.println("BLE LED Peripheral Started");
+    Serial.println("BLE Mode Peripheral Started");
   }
+  //if central device
   else {
     // start scanning for peripherals
     Serial.println("Connecting to Peripheral");
@@ -113,8 +93,20 @@ void setup() {
 }
 
 void loop() {
-  if (setPeripheral ==1) {
-    // listen for Bluetooth® Low Energy peripherals to connect:
+  //if peripheral device
+  if (setPeripheral == 1) {
+    loopPeripheral();
+  }
+  //if central device
+  else {
+    loopCentral();
+  }
+}
+
+
+//The loop function for the peripheral device. It will connect to central and wait until both central and peripheral are in the same mode
+void loopPeripheral() {
+  // listen for Bluetooth® Low Energy peripherals to connect:
     BLEDevice central = BLE.central();
 
     // if a central is connected to peripheral:
@@ -125,39 +117,79 @@ void loop() {
 
       // while the central is still connected to peripheral:
       while (central.connected()) {
-        // read the current distance
-        char distanceValue = sensor.readRangeSingleMillimeters();
-    
-        // has the value changed since the last read
-        bool distanceChanged = (distanceCharacteristic.value() != distanceValue);
-    
-        if (distanceChanged) {
-          // distance changed, update characteristics
-          distanceCharacteristic.writeValue(distanceValue);
-        }
-
-        // if the remote device wrote to the characteristic,
-        // use the value to control the LED: Can change to alert function
-        if (LEDCharacteristic.written()) {
-          if (LEDCharacteristic.value()) {   // any value other than 0
-            Serial.println("LED on");
-            digitalWrite(ledPin, HIGH);         // will turn the LED on
-            tone(BUZZ_PIN, 500);
-          } else {                              // a 0 value
-            Serial.println(F("LED off"));
-            noTone(BUZZ_PIN);
-            digitalWrite(ledPin, LOW);          // will turn the LED off
+        // initialize the current mode
+        char peripheralModeValue = mode;
+        char centralModeValue = modeCharacteristic.value();
+        
+        //Check if both modes match and delay the peripheral device if needed
+        while (peripheralModeValue != centralModeValue) {
+          // while modes do not match, check which one needs to wait
+          if(centralModeValue == 1) {
+            if(peripheralModeValue == 2) {
+              //If central is 1 and peripheral is 2, then peripheral needs to wait for central to catch up
+              Serial.println("Waiting for central to catch up");
+              delay(100);
+            }
+            else if (peripheralModeValue == 3) {
+              //If central is 1 and peripheral is 3, then central needs to wait for peripheral to catch up, peripheral needs to keep running
+            }
+            else {
+              Serial.println("These modes don't make sense");
+              Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
+            }
+          }
+          else if(centralModeValue == 2) {
+            if(peripheralModeValue == 1) {
+              //If central is 2 and peripheral is 1, then central needs to wait for peripheral to catch up, peripheral needs to keep running
+            }
+            else if (peripheralModeValue == 3) {
+              //If central is 2 and peripheral is 3, then peripheral needs to wait for central to catch up
+              Serial.println("Waiting for central to catch up");
+              delay(100);
+            }
+            else {
+              Serial.println("These modes don't make sense");
+              Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
+            }
+          }
+          else if (centralModeValue == 3) {
+            if (peripheralModeValue == 2) {
+              //If central is 3 and peripheral is 2, then central needs to wait for peripheral to catch up, peripheral needs to keep running
+            }
+            else if (peripheralModeValue == 1) {
+              //If central is 3 and peripheral is 1, then peripheral needs to wait for central to catch up
+              Serial.println("Waiting for central to catch up");
+              delay(100);
+            }
+            else {
+              Serial.println("These modes don't make sense");
+              Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
+            }
           }
         }
+
+        // Modes should now match, can continue out of bluetooth and back to normal switch
+        Serial.println("Modes Match");
       }
 
       // when the central disconnects, print it out:
       Serial.print(F("Disconnected from central: "));
       Serial.println(central.address());
     }
-  }
-  else {
-    // check if a peripheral has been discovered
+}
+
+//The loop function for the central device. It will connect to peripheral and wait until both central and peripheral are in the same mode
+void loopCentral () {
+  // check if a peripheral has been discovered
     BLEDevice peripheral = BLE.available();
 
     if (peripheral) {
@@ -179,17 +211,7 @@ void loop() {
       // stop scanning
       BLE.stopScan();
 
-      controlLed(peripheral);
-
-      // peripheral disconnected, start scanning again
-      BLE.scanForUuid(BLE_UUID_PERIPHERAL);
-    }
-    Serial.println(peripheral);
-  }
- }
- 
- void controlLed(BLEDevice peripheral) {
-  // connect to the peripheral
+      // connect to the peripheral
   Serial.println("Connecting ...");
 
   if (peripheral.connect()) {
@@ -209,34 +231,20 @@ void loop() {
     return;
   }
 
-  // retrieve the LED characteristic
-  BLECharacteristic ledCharacteristic = peripheral.characteristic(BLE_UUID_LED);
-  // retrieve the Button characteristic
-  BLECharacteristic distanceCharacteristic = peripheral.characteristic(BLE_UUID_DISTANCE);
+  // retrieve the Mode characteristic
+  BLECharacteristic modeCharacteristic = peripheral.characteristic(BLE_UUID_MODE);
 
-  if (!ledCharacteristic) {
-    Serial.println("Peripheral does not have LED characteristic!");
+  if (!modeCharacteristic) {
+    Serial.println("Peripheral does not have mode characteristic!");
     peripheral.disconnect();
     return;
-  } else if (!ledCharacteristic.canWrite()) {
-    Serial.println("Peripheral does not have a writable LED characteristic!");
+  } else if (!modeCharacteristic.canRead()) {
+    Serial.println("Peripheral does not have a readable mode characteristic!");
     peripheral.disconnect();
     return;
-  } else {
-    Serial.println("Connected to LED characteristic");
-  }
-
-  if (!distanceCharacteristic) {
-    Serial.println("Peripheral does not have distance characteristic!");
-    peripheral.disconnect();
-    return;
-  } else if (!distanceCharacteristic.canRead()) {
-    Serial.println("Peripheral does not have a readable distance characteristic!");
-    peripheral.disconnect();
-    return;
-  } else if (!distanceCharacteristic.canSubscribe()) {
-    Serial.println("Peripheral does not allow distance subscriptions (notify)");
-  } else if(!distanceCharacteristic.subscribe()) {
+  } else if (!modeCharacteristic.canSubscribe()) {
+    Serial.println("Peripheral does not allow mode subscriptions (notify)");
+  } else if(!modeCharacteristic.subscribe()) {
     Serial.println("Subscription failed!");
   } else {
     Serial.println("Connected to distance characteristic");
@@ -245,42 +253,72 @@ void loop() {
   while (peripheral.connected()) {
     // while the peripheral is connected
 
-    // read the distance
-    int distanceState = sensor.readRangeSingleMillimeters();
+      // initialize the current mode
+      char centralModeValue = mode;
+      char peripheralModeValue = (char)*modeCharacteristic.value();
+        
+      //Check if both modes match and delay the central device if needed
+      while (centralModeValue != peripheralModeValue) {
+          // while modes do not match, check which one needs to wait
+          if(peripheralModeValue == 1) {
+            if(centralModeValue == 2) {
+              //If peripheral is 1 and central is 2, then central needs to wait for peripheral to catch up
+              Serial.println("Waiting for peripheral to catch up");
+              delay(100);
+            }
+            else if (centralModeValue == 3) {
+              //If peripheral is 1 and central is 3, then peripheral needs to wait for center to catch up, center needs to keep running
+            }
+            else {
+              Serial.println("These modes don't make sense");
+              Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
+            }
+          }
+          else if(peripheralModeValue == 2) {
+            if(centralModeValue == 1) {
+              //If peripheral is 2 and central is 1, then peripheral needs to wait for central to catch up, central needs to keep running
+            }
+            else if (centralModeValue == 3) {
+              //If peripheral is 2 and central is 3, then central needs to wait for peripheral to catch up
+              Serial.println("Waiting for peripheral to catch up");
+              delay(100);
+            }
+            else {
+              Serial.println("These modes don't make sense");
+              Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
+            }
+          }
+          else if (peripheralModeValue == 3) {
+            if (centralModeValue == 2) {
+              //If peripheral is 3 and central is 2, then peripheral needs to wait for central to catch up, central needs to keep running
+            }
+            else if (centralModeValue == 1) {
+              //If peripheral is 3 and central is 1, then central needs to wait for peripheral to catch up
+              Serial.println("Waiting for peripheral to catch up");
+              delay(100);
+            }
+            else {
+              Serial.println("These modes don't make sense");
+              Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
+            }
+          }
+        }
 
-    if (oldDistance != distanceState) {
-      // distance changed
-      bool distanceChanged = ((signed)distanceCharacteristic.value() != distanceState);  //May be wrong logic
-      oldDistance = distanceState;
+        // Modes should now match, can continue out of bluetooth and back to normal switch
+        Serial.println("Modes Match");
 
-      if (!distanceChanged) {
-        Serial.println("Distance changed");
-
-        // button is pressed, write 0x01 to turn the LED on
-        ledCharacteristic.writeValue((byte)0x01);
-      } else {
-        Serial.println("Distance changed");
-
-        // button is released, write 0x00 to turn the LED off
-        ledCharacteristic.writeValue((byte)0x00);
-      }
+      // peripheral disconnected, start scanning again
+      BLE.scanForUuid(BLE_UUID_PERIPHERAL);
     }
-        if(distanceCharacteristic && distanceCharacteristic.canRead() && distanceCharacteristic.valueUpdated()) {
-      int peripheralDistance;
-      distanceCharacteristic.readValue(&peripheralDistance, sizeof(int));
-      bool distanceChanged = ((signed)distanceCharacteristic.value() != peripheralDistance);  //May be wrong logic
-      if(!peripheralDistance) {                                             //If it has changed then do something
-        digitalWrite(ledPin, HIGH);
-        tone(BUZZ_PIN, 1000);
-      } else {                                                              //If distance hasn't changed then stop doing the stuff
-        digitalWrite(ledPin, LOW);
-        noTone(BUZZ_PIN);
-      }
-      Serial.print("peripheralDistance = ");
-      Serial.println(peripheralDistance);
-    }
-
+    Serial.println(peripheral);
   }
-
-  Serial.println("Peripheral disconnected");
 }
