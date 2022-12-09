@@ -151,12 +151,7 @@ void loop() {
       break;
     default:  //Idle (all operations suspended)
       //All operations off and safe
-        /*LEDS
-         * Light Sensor
-         * Servos
-         * tft
-         * Buzzer
-         */
+        idle();
       //Add message to tft saying idle?
     break;
   }
