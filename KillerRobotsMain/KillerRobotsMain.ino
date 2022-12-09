@@ -20,10 +20,7 @@
 #include <Servo.h>             // Servo
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789 display
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 
 //Pins & Defines
 #define RIGHT_BUTTON_PIN   A0
@@ -214,13 +211,13 @@ float pidControl(float error) {
   return(KP*error + (float)cumError + d);
 }
 
-//attack function - must be called continuously in order to work
-int alertToggle = 0;
 
+int alertToggle = 0;
+int proxThreshold = 10;
 void attack() {
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
-  motorSpeed = pidControl(distanceError);
+ float  motorSpeed = pidControl(distanceError);
 
     int absSpeed = abs(motorSpeed);
   if(motorSpeed > 0) {
@@ -236,6 +233,7 @@ void attack() {
   }
 }
 
+//alert function - must be called continuously in order to work
 void Alert(){
   //Buzzer 
   if(alertToggle == 1){
