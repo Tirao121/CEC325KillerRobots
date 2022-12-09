@@ -53,7 +53,7 @@ Servo myservo;
 PeakDetection peakDetection; // create PeakDetection object
 
 //Variables
-int mode = 0;
+int mode = 1;
 double proxThreashold = 100;
   //PID Constants
   float KP = 4;  // proportional control gain
@@ -125,13 +125,16 @@ void loop() {
   switch(mode) {
     case 1:   //Standby
       angle = standby();
-      attack();
       break;
     case 2:   //Only Alert
       //Alert only, Use PID to turn to swivel angle, does not change modes until 
         //other robot detects change too
+        Alert();
       break;
-    case 3:   //Chase or Attack
+    case 3: 
+      attack();
+      Alert();
+      //Chase or Attack
       //PID
       //Alert function
       break;
@@ -213,7 +216,7 @@ float pidControl(float error) {
 
 
 int alertToggle = 0;
-int proxThreshold = 10;
+int proxThreshold = 70;
 void attack() {
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
