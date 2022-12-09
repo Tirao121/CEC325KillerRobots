@@ -59,6 +59,8 @@ double proxThreashold = 100;
   float KP = 4;  // proportional control gain
   float KI = .1; // integral gain
   float KD = 8;    // derivative gain
+unsigned long lastTime = millis();
+unsigned long curTime;
 
 void setup() {
   Serial.begin(115200);
@@ -110,14 +112,8 @@ void setup() {
   peakDetection.setEpsilon(0.02);
 }
 
-//Global Variables
-int proximity = 0;
-int motorspeed = 50;
-double angle = 90;       //swivel angle when change detected - default 90
-double data = 0.0;
-
 void loop() {
-  //Declare variables
+  //Declare variableS
   
   //Switch between different modes
   switch(mode) {
@@ -128,16 +124,25 @@ void loop() {
       //Alert only, Use PID to turn to swivel angle, does not change modes until 
         //other robot detects change too
         Alert();
+        lastTime = millis();
       break;
     case 3: 
       attack();
       Alert();
-      //Chase or Attack
-      //PID
-      //Alert function
+
+      curTime = millis();
+      if (curTime - lastTime >= 5000) {
+        mode = 4;   //after 5 seconds, implement withdraw function
+        lastTime = millis();
+      }
       break;
     case 4:   //Withdraw
       //After 5s or so, withdraw from target
+      withdraw();
+      curTime = millis();
+      if (curTime - lastTime >= 10000) {
+        mode = 1;   //after 10 seconds, return to standby
+      }
       break;
     default:  //Idle (all operations suspended)
       //All operations off and safe
@@ -217,8 +222,6 @@ float pidControl(float error) {
   return(KP*error + (float)cumError + d);
 }
 
-
-
 int proxThreshold = 70;
 void attack() {
   proximity = sensor.readRangeSingleMillimeters();
@@ -239,7 +242,7 @@ void attack() {
   }
 }
 
-int alertCounter = 0;
+
 //alert function - must be called continuously in order to work
 void Alert(){
   //Buzzer 
@@ -291,12 +294,55 @@ void withdraw() {
   //waits for 5 seconds
   //slowly backs away while silencing buzzers, blink lights?
   //ends with turning off lights and returning to standby mode
-  mode = 1;
+
+  //buzzer off at 6s
+  if (curTime - lastTime >= 3000) {
+    noTone(BUZZ_PIN);
+  }
+
+  //servos after 4s
+  if (curTime - lastTime <= 4000) {
+       //Backs away 
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, 100);
+    analogWrite(BIN1, 100);
+    analogWrite(BIN2, 0);
+    analogWrite(AIN1, 100);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 100);
+  } else {
+      //breaks
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 0);
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 0);
+  }
+
+  //display blank at 8s
+  if (curTime - lastTime >= 8000) {
+    tft.fillScreen(ST77XX_BLACK);
+  }
+
+  //Neopixels off at 9s
+  if (curTime - lastTime >= 9000) {
+    strip.clear();
+    strip.show();
+  } else {
+    for(int ii = 0; ii < NEO_COUNT; ii++) {
+      strip.setPixelColor(ii, strip.Color(100,0,0));
+    }
+  }
 }
 
 void idle(){
   //lights
   strip.clear();
+  strip.show();
   //buzzer
   noTone(BUZZ_PIN);
   //tft
