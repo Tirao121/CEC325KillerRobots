@@ -243,8 +243,8 @@ void Alert(){
   if(alertCounter == 0){
     tone(BUZZ_PIN, 466.16, 500);
   }
-  else if(alertCounter == 10){
     tone(BUZZ_PIN, 200, 500);
+  else if(alertCounter == 5){
   }
 
   //Neopixels
@@ -252,7 +252,7 @@ void Alert(){
     if(alertCounter == 0){
       strip.setPixelColor(ii, strip.Color(100,0,0));
       }
-      else if(alertCounter == 10){
+      else if(alertCounter == 5){
         strip.setPixelColor(ii, strip.Color(0,0,100));
     }
   }
@@ -279,7 +279,7 @@ void Alert(){
   tft.println("     (_)           (_)");
 
   alertCounter++;
-  if(alertCounter >= 20){
+  if(alertCounter >= 10){
     alertCounter = 0;
   }
 }
