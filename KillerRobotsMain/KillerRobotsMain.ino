@@ -115,7 +115,7 @@ void setup() {
 //Global Variables
 int proximity = 0;
 int motorspeed = 50;
-int angle = 90;       //swivel angle when change detected - default 90
+double angle = 90;       //swivel angle when change detected - default 90
 double data = 0.0;
 
 void loop() {
@@ -219,7 +219,7 @@ float pidControl(float error) {
 }
 
 
-int alertToggle = 0;
+
 int proxThreshold = 70;
 void attack() {
   proximity = sensor.readRangeSingleMillimeters();
@@ -240,25 +240,24 @@ void attack() {
   }
 }
 
+int alertCounter = 0;
 //alert function - must be called continuously in order to work
 void Alert(){
   //Buzzer 
-  if(alertToggle == 1){
-    tone(BUZZ_PIN, 466.16, 150);
-    alertToggle = 0;
+  if(alertCounter == 0){
+    tone(BUZZ_PIN, 466.16, 500);
   }
-  else{
-    tone(BUZZ_PIN, 200, 150);
-    alertToggle = 1;
+    tone(BUZZ_PIN, 200, 500);
+  else if(alertCounter == 5){
   }
 
   //Neopixels
   for(int ii = 0; ii < NEO_COUNT; ii++) {
-    if(alertToggle == 1){
-      strip.setPixelColor(ii, strip.Color(255,0,0));
+    if(alertCounter == 0){
+      strip.setPixelColor(ii, strip.Color(100,0,0));
       }
-      else{
-        strip.setPixelColor(ii, strip.Color(0,0,255));
+      else if(alertCounter == 5){
+        strip.setPixelColor(ii, strip.Color(0,0,100));
     }
   }
   strip.show();
@@ -283,6 +282,10 @@ void Alert(){
   tft.println("   (_, |           | ,_)");
   tft.println("     (_)           (_)");
 
+  alertCounter++;
+  if(alertCounter >= 10){
+    alertCounter = 0;
+  }
 }
 
 void withdraw() { 
