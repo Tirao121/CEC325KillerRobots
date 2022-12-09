@@ -66,17 +66,15 @@ void setup() {
   Serial.println("Starting...");
 
   //Distance Sensor setup
- //I think we need this for the distance sensor -Jacob
   Wire.begin();
   muxU31.attach(Wire, 0x20);
   muxU31.polarity(PCA95x5::Polarity::ORIGINAL_ALL);
   muxU31.direction(0x1CFF);  // 1 is input, see schematic to get upper and lower bytes
   muxU31.write(PCA95x5::Port::P09, PCA95x5::Level::H);  // enable VL6180 distance sensor
-  //I think we need this for the distance sensor -Jacob
   sensor.init();
   sensor.configureDefault();
   sensor.setScaling(SCALING);
-  sensor.setTimeout(100);
+  sensor.setTimeout(1000);
 
   //NeoPixel setup
   strip.begin();
@@ -151,8 +149,10 @@ void loop() {
          */
       //Add message to tft saying idle?
     break;
-    
   }
+  Serial.print(mode);
+  Serial.print("\t");
+  Serial.println(angle);
 }
 
 /* Detects change in radius, changes global var "mode" to alert if something detected
@@ -169,14 +169,14 @@ double standby() {
   analogWrite(BIN1, 0);
   analogWrite(BIN2, 0);
   double pos = 0.0;
+  int distance = 0;
   for (pos = 15; pos <= 155; pos += .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    int distance = sensor.readRangeSingleMillimeters();
+    distance = sensor.readRangeSingleMillimeters();
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
-    float stdpt = peakDetection.add(data); // adds a new data point
-    int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
-    double filtered = peakDetection.getFilt(); // moving average
+      float stdpt = peakDetection.add(data); // adds a new data point
+      int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
     //Only negative peak - enters field, not move away
     if(peak == -1) {
       mode = 2;
@@ -187,12 +187,11 @@ double standby() {
   }
   for (pos = 155; pos >= 15; pos -= .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    int distance = sensor.readRangeSingleMillimeters();
+    distance = sensor.readRangeSingleMillimeters();
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
     float stdpt = peakDetection.add(data); // adds a new data point
     int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
-    double filtered = peakDetection.getFilt(); // moving average
     //Only negative peak - enters field, not move away
     if(peak == -1) {
       mode = 2;
@@ -201,9 +200,9 @@ double standby() {
       mode = 1;
     }
   }  
-
-  
+  return pos;
 }
+
 // PID control
 float pidControl(float error) {
   static float cumError = 0.0;
@@ -248,7 +247,7 @@ void Alert(){
     tone(BUZZ_PIN, 466.16, 500);
   }
     tone(BUZZ_PIN, 200, 500);
-  else if(alertCounter == 5){
+  if(alertCounter == 5){
   }
 
   //Neopixels
