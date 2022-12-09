@@ -151,6 +151,7 @@ void loop() {
          */
       //Add message to tft saying idle?
     break;
+    
   }
 }
 
@@ -168,7 +169,8 @@ double standby() {
   analogWrite(BIN1, 0);
   analogWrite(BIN2, 0);
   double pos = 0.0;
-  for (pos = 1; pos <= 155; pos += .5) {
+  for (pos = 15; pos <= 155; pos += .5) {
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
     int distance = sensor.readRangeSingleMillimeters();
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
@@ -183,7 +185,8 @@ double standby() {
       mode = 1;
     }
   }
-  for (pos = 1; pos <= 155; pos -= .5) {
+  for (pos = 155; pos >= 15; pos -= .5) {
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
     int distance = sensor.readRangeSingleMillimeters();
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
@@ -198,6 +201,7 @@ double standby() {
       mode = 1;
     }
   }  
+
   
 }
 // PID control
