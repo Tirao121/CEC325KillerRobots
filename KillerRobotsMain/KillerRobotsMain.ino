@@ -59,6 +59,11 @@ double proxThreashold = 100;
   float KP = 4;  // proportional control gain
   float KI = .1; // integral gain
   float KD = 8;    // derivative gain
+int proximity = 0;
+int motorspeed = 50;
+double angle = 90;       //swivel angle when change detected - default 90
+double data = 0.0;
+int alertCounter = 0;
 unsigned long lastTime = millis();
 unsigned long curTime;
 
