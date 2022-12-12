@@ -66,7 +66,7 @@ double data = 0.0;
 int alertCounter = 0;
 unsigned long lastTime = millis();
 unsigned long curTime;
-bool turnNeeded = 1;
+int turnNeeded = 1;
 
 void setup() {
   Serial.begin(115200);
@@ -124,16 +124,18 @@ void loop() {
   //Switch between different modes
   switch(mode) {
     case 1:   //Standby
+      Serial.println("I'm in mode 1");
       angle = standby();
       lastTime = millis();
       break;
     case 2: 
+      Serial.println("I'm in mode 2");
       //To prevent turning forever loop
-      if (turnNeeded == 1) {
+      //if (turnNeeded == 1) {
         turn(angle);
-      }
-      attack();
-      Alert();
+     // }
+     // attack();
+     // Alert();
 
       curTime = millis();
       if (curTime - lastTime >= 5000) {
@@ -142,6 +144,7 @@ void loop() {
       }
       break;
     case 3:   //Withdraw
+      Serial.println("I'm in mode 3");
       //After 5s or so, withdraw from target
       withdraw();
       curTime = millis();
@@ -155,9 +158,9 @@ void loop() {
       //Add message to tft saying idle?
     break;
   }
-  Serial.print(mode);
-  Serial.print("\t");
-  Serial.println(angle);
+ // Serial.println(mode);
+ // Serial.println("\t");
+  //Serial.println(angle);
 }
 
 /* Detects change in radius, changes global var "mode" to alert if something detected
@@ -184,9 +187,10 @@ double standby() {
       int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
     //Only negative peak - enters field, not move away
     if(peak == -1) {
+      Serial.println(pos);
+      delay(1000);
       mode = 2;
       return pos;
-      Serial.println(pos);
     } else {
       mode = 1;
     }
@@ -216,10 +220,10 @@ float pidControl(float error) {
   static int lastError = 0;
   float d = KD*(error - lastError);
   cumError += KI*(float)error;
-  Serial.print(cumError);
-  Serial.print(",");
-  Serial.print(d);
-  Serial.print(",");
+  //Serial.print(cumError);
+  //Serial.print(",");
+  //Serial.print(d);
+ // Serial.print(",");
   lastError = error;
   return(KP*error + (float)cumError + d);
 }
@@ -249,9 +253,9 @@ void attack() {
 void Alert(){
   //Buzzer 
   if(alertCounter == 0){
-    tone(BUZZ_PIN, 466.16, 500);
+    //tone(BUZZ_PIN, 466.16, 500);
   }
-    tone(BUZZ_PIN, 200, 500);
+   // tone(BUZZ_PIN, 200, 500);
   if(alertCounter == 5){
   }
 
@@ -370,21 +374,22 @@ void idle(){
 }
 
 void turn(double victimAngle) {
-  if (victimAngle < 90) {
+  Serial.println("Im Turning");
+  if (victimAngle < 90.0) {
   analogWrite(BIN2, 255/2); //R forward
   analogWrite(AIN1, 0); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  delay(victimAngle * (76/9)); //angle multiplied by 76/9
+  delay(victimAngle * (76.0/9.0)); //angle multiplied by 76/9
   }
-  if (victimAngle > 90) {
+  if (victimAngle > 90.0) {
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 255/2); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  delay(victimAngle * (76/9)); //angle multiplied by 76/9
+  delay(victimAngle * (76.0/9.0)); //angle multiplied by 76/9
   }
 
   //if turn is complete by the end of this function
-  turnNeeded = 0;
+  //turnNeeded = 0;
 }
