@@ -30,14 +30,14 @@ BLEService modeService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy Mode Serv
 BLEIntCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLEWrite | BLENotify);
 
 // define which device this is
-#define setPeripheral 1   //Can change: 1 is peripheral, 0 is central
+#define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
 char* robotName = "KROS"; //Don't change
 
 // variables for bluetooth
 int oldMode = 0;
 
 //Variables
-int mode = 3;
+int mode = 2;
 
 void setup() {
   Serial.begin(115200);
