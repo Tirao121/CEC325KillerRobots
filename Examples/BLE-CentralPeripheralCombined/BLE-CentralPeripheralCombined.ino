@@ -27,7 +27,7 @@
 BLEService modeService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy Mode Service
 
 // create mode characteristic and allow remote device to get notifications
-BLEIntCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLENotify);
+BLEIntCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLEWrite | BLENotify);
 
 // define which device this is
 #define setPeripheral 1   //Can change: 1 is peripheral, 0 is central
