@@ -34,10 +34,10 @@ BLEIntCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLEWrite | BLEN
 char* robotName = "KROS"; //Don't change
 
 // variables for bluetooth
-int oldMode = 0;
+int oldMode = 2;
 
 //Variables
-int mode = 2;
+int mode = 4;
 
 void setup() {
   Serial.begin(115200);
@@ -115,12 +115,12 @@ void loopPeripheral() {
       // while the central is still connected to peripheral:
       while (central.connected()) {
         // initialize the current mode
-        char peripheralModeValue = mode;
-        char centralModeValue = central.characteristic(BLE_UUID_MODE); //some error here
+        char peripheralModeValue = modeCharacteristic.value(); //some error here
+        char centralModeValue = 4;
         
         //Check if both modes match and delay the peripheral device if needed
-        while (mode != central.characteristic(BLE_UUID_MODE)) {
-          // while modes do not match, check which one needs to wait
+        while (oldMode != modeCharacteristic.value()) {
+          // while peripheral mode changed, check which one needs to wait
           if(centralModeValue == 1) {
             if(peripheralModeValue == 2) {
               //If central is 1 and peripheral is 2, then peripheral needs to wait for central to catch up
