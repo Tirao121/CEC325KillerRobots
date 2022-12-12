@@ -31,6 +31,7 @@ BLEByteCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLEWrite | BLE
 
 // define which device this is
 #define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
+char* robotName;
 
 // variables for bluetooth
 byte oldMode = 1;
@@ -47,11 +48,11 @@ void setup() {
   }
 
   if (setPeripheral == 0) {
-  static char* robotName = "KROSP"; //Don't change
-}
-else {
-  static char* robotName = "KROSC"; //Don't change
-}
+    robotName = "KROSP"; //Don't change
+  }
+  else {
+    robotName = "KROSC"; //Don't change
+  }
 
   // begin Bluetooth initialization
   if (!BLE.begin()) {
@@ -94,12 +95,6 @@ else {
 }
 
 void loop() {
-  if (setPeripheral == 0) {
-    static char* robotName = "KROSP"; //Don't change
-  }
-  else {
-    static char* robotName = "KROSC"; //Don't change
-  }
   
   //if peripheral device
   if (setPeripheral == 1) {
