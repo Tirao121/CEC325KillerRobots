@@ -124,24 +124,19 @@ void loop() {
   switch(mode) {
     case 1:   //Standby
       angle = standby();
+      lastTime = millis();
       break;
-    case 2:   //Only Alert
-      //Alert only, Use PID to turn to swivel angle, does not change modes until 
-        //other robot detects change too
-        Alert();
-        lastTime = millis();
-      break;
-    case 3: 
+    case 2: 
       attack();
       Alert();
 
       curTime = millis();
       if (curTime - lastTime >= 5000) {
-        mode = 4;   //after 5 seconds, implement withdraw function
+        mode = 3;   //after 5 seconds, implement withdraw function
         lastTime = millis();
       }
       break;
-    case 4:   //Withdraw
+    case 3:   //Withdraw
       //After 5s or so, withdraw from target
       withdraw();
       curTime = millis();
