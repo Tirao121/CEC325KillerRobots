@@ -47,7 +47,7 @@ void setup() {
     
   }
 
-  if (setPeripheral == 0) {
+  if (setPeripheral == 1) {
     robotName = "KROSP"; //Don't change
   }
   else {
