@@ -117,9 +117,11 @@ void loopPeripheral() {
         // initialize the current mode
         char peripheralModeValue = modeCharacteristic.value(); //some error here
         char centralModeValue = 4;
+        Serial.println("Set mode values");
         
         //Check if both modes match and delay the peripheral device if needed
         while (oldMode != modeCharacteristic.value()) {
+          Serial.println("Made it to oldMode while loop");
           // while peripheral mode changed, check which one needs to wait
           if(centralModeValue == 1) {
             if(peripheralModeValue == 2) {
