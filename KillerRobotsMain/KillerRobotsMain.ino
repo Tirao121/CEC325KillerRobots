@@ -129,9 +129,9 @@ void loop() {
       break;
     case 2: 
       //To prevent turning forever loop
-      //if (turnedNeeded) {
-        //turn();
-      //}
+      if (turnNeeded == 1) {
+        turn(angle);
+      }
       attack();
       Alert();
 
@@ -186,6 +186,7 @@ double standby() {
     if(peak == -1) {
       mode = 2;
       return pos;
+      Serial.println(pos);
     } else {
       mode = 1;
     }
@@ -201,6 +202,7 @@ double standby() {
     if(peak == -1) {
       mode = 2;
       return pos;
+      Serial.println(pos);
     } else {
       mode = 1;
     }
@@ -384,5 +386,5 @@ void turn(double victimAngle) {
   }
 
   //if turn is complete by the end of this function
-  //turnNeeded = 0;
+  turnNeeded = 0;
 }
