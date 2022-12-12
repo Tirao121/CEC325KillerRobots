@@ -94,6 +94,13 @@ else {
 }
 
 void loop() {
+  if (setPeripheral == 0) {
+    static char* robotName = "KROSP"; //Don't change
+  }
+  else {
+    static char* robotName = "KROSC"; //Don't change
+  }
+  
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
