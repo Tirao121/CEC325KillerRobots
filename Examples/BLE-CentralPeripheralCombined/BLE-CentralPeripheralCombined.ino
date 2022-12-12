@@ -78,7 +78,7 @@ void setup() {
     BLE.addService(modeService);
 
     // set the initial value for the characeristic:
-    modeCharacteristic.writeValue(mode);
+    modeCharacteristic.writeValue(2);
   
     // start advertising
     BLE.advertise();
