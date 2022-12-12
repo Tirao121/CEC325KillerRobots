@@ -66,6 +66,7 @@ double data = 0.0;
 int alertCounter = 0;
 unsigned long lastTime = millis();
 unsigned long curTime;
+bool turnNeeded = 1;
 
 void setup() {
   Serial.begin(115200);
@@ -127,6 +128,10 @@ void loop() {
       lastTime = millis();
       break;
     case 2: 
+      //To prevent turning forever loop
+      //if (turnedNeeded) {
+        //turn();
+      //}
       attack();
       Alert();
 
@@ -378,4 +383,6 @@ void turn(double victimAngle) {
   delay(victimAngle * (76/9)); //angle multiplied by 76/9
   }
 
+  //if turn is complete by the end of this function
+  //turnNeeded = 0;
 }
