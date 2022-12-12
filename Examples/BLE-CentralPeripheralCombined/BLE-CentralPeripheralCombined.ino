@@ -29,9 +29,6 @@ BLEService modeService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy Mode Serv
 // create mode characteristic and allow remote device to get notifications
 BLEIntCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLENotify);
 
-//Pins & Defines, will not be needed eventually
-#define BUZZ_PIN           2
-
 // define which device this is
 #define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
 char* robotName = "KROS"; //Don't change
@@ -40,7 +37,7 @@ char* robotName = "KROS"; //Don't change
 int oldMode = 0;
 
 //Variables
-int mode = 0;
+int mode = 2;
 
 void setup() {
   Serial.begin(115200);
@@ -49,8 +46,6 @@ void setup() {
   while (!Serial) {
     
   }
-
-  pinMode(BUZZ_PIN, OUTPUT);    //Buzzer setup
 
   // begin Bluetooth initialization
   if (!BLE.begin()) {
@@ -96,6 +91,8 @@ void loop() {
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
+    delay(5000);
+    mode = 2;
   }
   //if central device
   else {
@@ -119,10 +116,10 @@ void loopPeripheral() {
       while (central.connected()) {
         // initialize the current mode
         char peripheralModeValue = mode;
-        char centralModeValue = modeCharacteristic.value();
+        char centralModeValue = central.characteristic(BLE_UUID_MODE); //some error here
         
         //Check if both modes match and delay the peripheral device if needed
-        while (peripheralModeValue != centralModeValue) {
+        while (mode != central.characteristic(BLE_UUID_MODE)) {
           // while modes do not match, check which one needs to wait
           if(centralModeValue == 1) {
             if(peripheralModeValue == 2) {
