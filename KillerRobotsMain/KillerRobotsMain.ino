@@ -175,7 +175,7 @@ double standby() {
   analogWrite(BIN2, 0);
   double pos = 0.0;
   int distance = 0;
-  for (pos = 6; pos <= 155; pos += .5) {
+  for (pos = 65; pos <= 155; pos += .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     distance = sensor.readRangeSingleMillimeters();
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
