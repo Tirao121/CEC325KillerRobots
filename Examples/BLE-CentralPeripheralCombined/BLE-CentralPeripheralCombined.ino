@@ -27,17 +27,17 @@
 BLEService modeService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy Mode Service
 
 // create mode characteristic and allow remote device to get notifications
-BLEIntCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLEWrite | BLENotify);
+BLEByteCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLEWrite | BLENotify);
 
 // define which device this is
 #define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
 char* robotName = "KROS"; //Don't change
 
 // variables for bluetooth
-int oldMode = 2;
+byte oldMode = 1;
 
 //Variables
-int mode = 4;
+byte mode = 3;
 
 void setup() {
   Serial.begin(115200);
@@ -115,8 +115,8 @@ void loopPeripheral() {
       // while the central is still connected to peripheral:
       while (central.connected()) {
         // initialize the current mode
-        char peripheralModeValue = modeCharacteristic.value(); //some error here
-        char centralModeValue = 4;
+        byte peripheralModeValue = modeCharacteristic.value(); //some error here
+        byte centralModeValue = 3;
         Serial.println("Set mode values");
         
         //Check if both modes match and delay the peripheral device if needed
@@ -253,8 +253,8 @@ void loopCentral () {
     // while the peripheral is connected
 
       // initialize the current mode
-      char centralModeValue = mode;
-      char peripheralModeValue = (char)*modeCharacteristic.value();
+      byte centralModeValue = mode;
+      byte peripheralModeValue = (char)*modeCharacteristic.value();
         
       //Check if both modes match and delay the central device if needed
       while (centralModeValue != peripheralModeValue) {
