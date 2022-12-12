@@ -17,8 +17,8 @@
 // BLE UUIDs
 //----------------------------------------------------------------------------------------------------------------------
 #define BLE_UUID_PERIPHERAL          "19B10000-E8F2-537E-4F6C-D104768A1214"
-#define BLE_UUID_LED                 "19B10001-E8F2-537E-4F6C-D104768A1214"
-#define BLE_UUID_BUTTON              "19B10012-E8F2-537E-4F6C-D104768A1214"
+#define BLE_UUID_LED                 "19B10001-E8F2-537E-4F6C-D104768A1215"
+#define BLE_UUID_BUTTON              "19B10012-E8F2-537E-4F6C-D104768A1216"
 
 BLEService ledService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy LED Service
 
