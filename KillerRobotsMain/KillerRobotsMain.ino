@@ -59,6 +59,13 @@ double proxThreashold = 100;
   float KP = 4;  // proportional control gain
   float KI = .1; // integral gain
   float KD = 8;    // derivative gain
+int proximity = 0;
+int motorspeed = 50;
+double angle = 90;       //swivel angle when change detected - default 90
+double data = 0.0;
+int alertCounter = 0;
+unsigned long lastTime = millis();
+unsigned long curTime;
 
 void setup() {
   Serial.begin(115200);
@@ -66,17 +73,15 @@ void setup() {
   Serial.println("Starting...");
 
   //Distance Sensor setup
- //I think we need this for the distance sensor -Jacob
   Wire.begin();
   muxU31.attach(Wire, 0x20);
   muxU31.polarity(PCA95x5::Polarity::ORIGINAL_ALL);
   muxU31.direction(0x1CFF);  // 1 is input, see schematic to get upper and lower bytes
   muxU31.write(PCA95x5::Port::P09, PCA95x5::Level::H);  // enable VL6180 distance sensor
-  //I think we need this for the distance sensor -Jacob
   sensor.init();
   sensor.configureDefault();
   sensor.setScaling(SCALING);
-  sensor.setTimeout(100);
+  sensor.setTimeout(1000);
 
   //NeoPixel setup
   strip.begin();
@@ -112,47 +117,42 @@ void setup() {
   peakDetection.setEpsilon(0.02);
 }
 
-//Global Variables
-int proximity = 0;
-int motorspeed = 50;
-double angle = 90;       //swivel angle when change detected - default 90
-double data = 0.0;
-
 void loop() {
-  //Declare variables
+  //Declare variableS
   
   //Switch between different modes
   switch(mode) {
     case 1:   //Standby
       angle = standby();
+      lastTime = millis();
       break;
-    case 2:   //Only Alert
-      //Alert only, Use PID to turn to swivel angle, does not change modes until 
-        //other robot detects change too
-        Alert();
-      break;
-    case 3: 
+    case 2: 
       attack();
       Alert();
-      //Chase or Attack
-      //PID
-      //Alert function
+
+      curTime = millis();
+      if (curTime - lastTime >= 5000) {
+        mode = 3;   //after 5 seconds, implement withdraw function
+        lastTime = millis();
+      }
       break;
-    case 4:   //Withdraw
+    case 3:   //Withdraw
       //After 5s or so, withdraw from target
+      withdraw();
+      curTime = millis();
+      if (curTime - lastTime >= 10000) {
+        mode = 1;   //after 10 seconds, return to standby
+      }
       break;
     default:  //Idle (all operations suspended)
       //All operations off and safe
-        /*LEDS
-         * Light Sensor
-         * Servos
-         * tft
-         * Buzzer
-         */
+        idle();
       //Add message to tft saying idle?
     break;
-    
   }
+  Serial.print(mode);
+  Serial.print("\t");
+  Serial.println(angle);
 }
 
 /* Detects change in radius, changes global var "mode" to alert if something detected
@@ -169,14 +169,14 @@ double standby() {
   analogWrite(BIN1, 0);
   analogWrite(BIN2, 0);
   double pos = 0.0;
+  int distance = 0;
   for (pos = 15; pos <= 155; pos += .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    int distance = sensor.readRangeSingleMillimeters();
+    distance = sensor.readRangeSingleMillimeters();
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
-    float stdpt = peakDetection.add(data); // adds a new data point
-    int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
-    double filtered = peakDetection.getFilt(); // moving average
+      float stdpt = peakDetection.add(data); // adds a new data point
+      int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
     //Only negative peak - enters field, not move away
     if(peak == -1) {
       mode = 2;
@@ -187,12 +187,11 @@ double standby() {
   }
   for (pos = 155; pos >= 15; pos -= .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    int distance = sensor.readRangeSingleMillimeters();
+    distance = sensor.readRangeSingleMillimeters();
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
     float stdpt = peakDetection.add(data); // adds a new data point
     int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
-    double filtered = peakDetection.getFilt(); // moving average
     //Only negative peak - enters field, not move away
     if(peak == -1) {
       mode = 2;
@@ -201,9 +200,9 @@ double standby() {
       mode = 1;
     }
   }  
-
-  
+  return pos;
 }
+
 // PID control
 float pidControl(float error) {
   static float cumError = 0.0;
@@ -217,8 +216,6 @@ float pidControl(float error) {
   lastError = error;
   return(KP*error + (float)cumError + d);
 }
-
-
 
 int proxThreshold = 70;
 void attack() {
@@ -240,7 +237,7 @@ void attack() {
   }
 }
 
-int alertCounter = 0;
+
 //alert function - must be called continuously in order to work
 void Alert(){
   //Buzzer 
@@ -248,7 +245,7 @@ void Alert(){
     tone(BUZZ_PIN, 466.16, 500);
   }
     tone(BUZZ_PIN, 200, 500);
-  else if(alertCounter == 5){
+  if(alertCounter == 5){
   }
 
   //Neopixels
@@ -292,12 +289,55 @@ void withdraw() {
   //waits for 5 seconds
   //slowly backs away while silencing buzzers, blink lights?
   //ends with turning off lights and returning to standby mode
-  mode = 1;
+
+  //buzzer off at 6s
+  if (curTime - lastTime >= 3000) {
+    noTone(BUZZ_PIN);
+  }
+
+  //servos after 4s
+  if (curTime - lastTime <= 4000) {
+       //Backs away 
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, 100);
+    analogWrite(BIN1, 100);
+    analogWrite(BIN2, 0);
+    analogWrite(AIN1, 100);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 100);
+  } else {
+      //breaks
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 0);
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 0);
+  }
+
+  //display blank at 8s
+  if (curTime - lastTime >= 8000) {
+    tft.fillScreen(ST77XX_BLACK);
+  }
+
+  //Neopixels off at 9s
+  if (curTime - lastTime >= 9000) {
+    strip.clear();
+    strip.show();
+  } else {
+    for(int ii = 0; ii < NEO_COUNT; ii++) {
+      strip.setPixelColor(ii, strip.Color(100,0,0));
+    }
+  }
 }
 
 void idle(){
   //lights
   strip.clear();
+  strip.show();
   //buzzer
   noTone(BUZZ_PIN);
   //tft
