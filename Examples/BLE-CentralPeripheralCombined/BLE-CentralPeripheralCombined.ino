@@ -132,10 +132,10 @@ void loopPeripheral() {
       while (central.connected()) {
         // initialize the current mode
         if (pModeCharacteristic.value() != pMode) {
-          pModeCharacteristic.writeValue((byte)pMode);
+          pModeCharacteristic.writeValue(pMode);
         }
         if (cModeCharacteristic.value() != cMode) {
-          cModeCharacteristic.writeValue((byte)cMode);
+          cModeCharacteristic.writeValue(cMode);
         }
         byte peripheralModeValue = (byte)pModeCharacteristic.value(); //some error here
         byte centralModeValue = (byte)cModeCharacteristic.value();
@@ -166,6 +166,8 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if(peripheralModeValue == 2) {
             Serial.println("Made it to PMode Else If");
@@ -186,6 +188,8 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if (peripheralModeValue == 3) {
             while (cModeCharacteristic.value() == 2) {
@@ -204,6 +208,8 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
         }
 
@@ -331,6 +337,8 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if(centralModeValue == 2) {
             while(pModeCharacteristic.readValue(peripheralModeValue) == 1) {
@@ -349,6 +357,8 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if (centralModeValue == 3) {
             Serial.println("Made it to cMode equals 3 else if");
@@ -370,6 +380,8 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
         }
 
