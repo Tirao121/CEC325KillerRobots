@@ -124,18 +124,19 @@ void loop() {
   //Switch between different modes
   switch(mode) {
     case 1:   //Standby
-      Serial.println("I'm in mode 1");
+     // Serial.println("I'm in mode 1");
       angle = standby();
       lastTime = millis();
+      turnNeeded = 1;
       break;
     case 2: 
-      Serial.println("I'm in mode 2");
+      //Serial.println("I'm in mode 2");
       //To prevent turning forever loop
-      //if (turnNeeded == 1) {
+      if (turnNeeded == 1) {
         turn(angle);
-     // }
-     // attack();
-     // Alert();
+      }
+      attack();
+      //Alert();
 
       curTime = millis();
       if (curTime - lastTime >= 5000) {
@@ -144,7 +145,7 @@ void loop() {
       }
       break;
     case 3:   //Withdraw
-      Serial.println("I'm in mode 3");
+      //Serial.println("I'm in mode 3");
       //After 5s or so, withdraw from target
       withdraw();
       curTime = millis();
@@ -232,7 +233,7 @@ int proxThreshold = 70;
 void attack() {
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
- float  motorSpeed = pidControl(distanceError);
+  float  motorSpeed = pidControl(distanceError);
 
     int absSpeed = abs(motorSpeed);
   if(motorSpeed > 0) {
@@ -374,22 +375,31 @@ void idle(){
 }
 
 void turn(double victimAngle) {
-  Serial.println("Im Turning");
+  //Serial.println("Im Turning");
   if (victimAngle < 90.0) {
-  analogWrite(BIN2, 255/2); //R forward
-  analogWrite(AIN1, 0); //L forward
-  analogWrite(AIN2, 0); //L back
-  analogWrite(BIN1, 0); //R back
-  delay(victimAngle * (76.0/9.0)); //angle multiplied by 76/9
-  }
-  if (victimAngle > 90.0) {
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 255/2); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  delay(victimAngle * (76.0/9.0)); //angle multiplied by 76/9
+  delay((90 - victimAngle) * (76.0/9.0)); //angle multiplied by 76/9
   }
+  if (victimAngle > 90.0) {
+  analogWrite(BIN2, 255/2); //R forward
+  analogWrite(AIN1, 0); //L forward
+  analogWrite(AIN2, 0); //L back
+  analogWrite(BIN1, 0); //R back
+  //delay(2000);
+  delay((victimAngle - 90) * (76.0/9.0)); //angle multiplied by 76/9
+  }
+  analogWrite(BIN2, 0); //R forward
+  analogWrite(AIN1, 0); //L forward
+  analogWrite(AIN2, 0); //L back
+  analogWrite(BIN1, 0); //R back
+  myservo.write(90); //May need to be calibrated. It should be in the center
+  delay(1000);
 
-  //if turn is complete by the end of this function
-  //turnNeeded = 0;
+
+ // if turn is complete by the end of this function
+  turnNeeded = 0;
+
 }
