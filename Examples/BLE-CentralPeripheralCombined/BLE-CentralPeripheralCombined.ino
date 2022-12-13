@@ -131,6 +131,8 @@ void loopPeripheral() {
       // while the central is still connected to peripheral:
       while (central.connected()) {
         // initialize the current mode
+        pModeCharacteristic.writeValue(pMode);
+        cModeCharacteristic.writeValue(cMode);
         byte peripheralModeValue = (byte)pModeCharacteristic.value(); //some error here
         byte centralModeValue = (byte)cModeCharacteristic.value();
         Serial.println("Set mode values");
