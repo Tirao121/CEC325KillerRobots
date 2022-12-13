@@ -56,9 +56,9 @@ PeakDetection peakDetection; // create PeakDetection object
 int mode = 1;
 double proxThreashold = 100;
   //PID Constants
-  float KP = 4;  // proportional control gain
-  float KI = .1; // integral gain
-  float KD = 8;    // derivative gain
+  float KP = 15;  // proportional control gain
+  float KI = 0; // integral gain
+  float KD = 0;    // derivative gain
 int proximity = 0;
 int motorspeed = 50;
 double angle = 90;       //swivel angle when change detected - default 90
@@ -67,6 +67,7 @@ int alertCounter = 0;
 unsigned long lastTime = millis();
 unsigned long curTime;
 int turnNeeded = 1;
+int proxThreshold = 70;
 
 void setup() {
   Serial.begin(115200);
@@ -207,7 +208,7 @@ double standby() {
     if(peak == -1) {
       mode = 2;
       return pos;
-      Serial.println(pos);
+      //Serial.println(pos);
     } else {
       mode = 1;
     }
@@ -221,15 +222,15 @@ float pidControl(float error) {
   static int lastError = 0;
   float d = KD*(error - lastError);
   cumError += KI*(float)error;
-  //Serial.print(cumError);
-  //Serial.print(",");
-  //Serial.print(d);
- // Serial.print(",");
+  Serial.print(cumError);
+  Serial.print(",");
+  Serial.print(d);
+  Serial.print(",");
   lastError = error;
   return(KP*error + (float)cumError + d);
 }
 
-int proxThreshold = 70;
+
 void attack() {
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
