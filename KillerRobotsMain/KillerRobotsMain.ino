@@ -140,8 +140,8 @@ void loop() {
       Alert();
 
       curTime = millis();
-      if (curTime - lastTime >= 10000) {
-        mode = 3;   //after 10 seconds, implement withdraw function
+      if (curTime - lastTime >= 5000) {
+        mode = 3;   //after 5 seconds, implement withdraw function
         lastTime = millis();
       }
       break;
@@ -189,7 +189,7 @@ double standby() {
       int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
     //Only negative peak - enters field, not move away
     if(peak == -1) {
-      //Serial.println(pos);
+      Serial.println(pos);
       delay(1000);
       mode = 2;
       return pos;
@@ -381,12 +381,13 @@ void idle(){
 
 void turn(double victimAngle) {
   //Serial.println("Im Turning");
-  if (victimAngle < 90.0) {
+  if (victimAngle < 100.0) {
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 255/2); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  delay((90 - victimAngle) * (76.0/9.0)); //angle multiplied by 76/9
+  Serial.println((100.0 - victimAngle));
+  delay((100.0 - victimAngle) * (20.0)); //done through interation. Could be diff for diff board
   }
   if (victimAngle > 100.0) {
   analogWrite(BIN2, 255/2); //R forward
@@ -394,7 +395,8 @@ void turn(double victimAngle) {
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
   //delay(2000);
-  delay((victimAngle - 100.0) * (76.0/9.0)); //angle multiplied by 76/9
+  Serial.println((victimAngle - 100.0));
+  delay((victimAngle - 100.0) * (20.0)); //done through interation. Could be diff for diff board
   }
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 0); //L forward
@@ -405,6 +407,11 @@ void turn(double victimAngle) {
 
 
  // if turn is complete by the end of this function
+  if (sensor.readRangeSingleMillimeters() < 765) {
   turnNeeded = 0;
+  } else {
+  mode = 1;
+  turnNeeded = 1; 
+  }
 
 }
