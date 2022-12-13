@@ -131,9 +131,9 @@ void loopPeripheral() {
       // while the central is still connected to peripheral:
       while (central.connected()) {
         // initialize the current mode
-        if (pModeCharacteristic.value() != pMode) {
+        //if (pModeCharacteristic.value() != pMode) {
           pModeCharacteristic.writeValue(pMode);
-        }
+        //}
         if (cModeCharacteristic.value() != cMode) {
           cModeCharacteristic.writeValue(cMode);
         }
@@ -166,10 +166,12 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            if (pMode == pModeCharacteristic.value()) {
+            if (1 == pModeCharacteristic.value()) {
+              pMode = 1;
               oldPMode = pMode;
             }
-            if (cMode == cModeCharacteristic.value()) {
+            if (centralModeValue == cModeCharacteristic.value()) {
+              cMode = centralModeValue;
               oldCMode = cMode;
             }
           }
@@ -192,10 +194,12 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            if (pMode == pModeCharacteristic.value()) {
+            if (2 == pModeCharacteristic.value()) {
+              pMode = 2;
               oldPMode = pMode;
             }
-            if (cMode == cModeCharacteristic.value()) {
+            if (centralModeValue != cMode) {
+              cMode = centralModeValue;
               oldCMode = cMode;
             }
           }
@@ -216,10 +220,12 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            if (pMode == pModeCharacteristic.value()) {
+            if (3 == pModeCharacteristic.value()) {
+              pMode = peripheralModeValue;
               oldPMode = pMode;
             }
-            if (cMode == cModeCharacteristic.value()) {
+            if (centralModeValue == cModeCharacteristic.value()) {
+              cMode = centralModeValue;
               oldCMode = cMode;
             }
           }
