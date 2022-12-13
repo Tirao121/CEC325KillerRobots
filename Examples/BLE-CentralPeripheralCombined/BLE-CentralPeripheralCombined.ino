@@ -215,6 +215,10 @@ void loopPeripheral() {
 
         // Modes should now match, can continue out of bluetooth and back to normal switch
         Serial.println("Modes Match");
+        Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
       }
 
       // when the central disconnects, print it out:
@@ -387,6 +391,10 @@ void loopCentral () {
 
         // Modes should now match, can continue out of bluetooth and back to normal switch
         Serial.println("Modes Match");
+        Serial.print("Central Mode: ");
+              Serial.println(centralModeValue);
+              Serial.print("Peripheral Mode: ");
+              Serial.println(peripheralModeValue);
 
       // peripheral disconnected, start scanning again
       BLE.scanForUuid(BLE_UUID_PERIPHERAL);
