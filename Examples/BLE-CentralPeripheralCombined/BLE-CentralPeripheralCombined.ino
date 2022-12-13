@@ -156,6 +156,7 @@ void loopPeripheral() {
             }
           }
           else if(peripheralModeValue == 2) {
+            Serial.println("Made it to PMode Else If");
             while(cModeCharacteristic.value() == 1) {
               //If central is 1 and peripheral is 2, then peripheral needs to wait for central to catch up
               if (cModeCharacteristic.written()) {
@@ -163,6 +164,7 @@ void loopPeripheral() {
               }
             }
             if (centralModeValue == 3) {
+              Serial.println("Made it to CMode while loop");
               //If central is 3 and peripheral is 2, then central needs to wait for peripheral to catch up, peripheral needs to keep running
             }
             else if (centralModeValue != 1 || centralModeValue != 3) {
@@ -292,6 +294,7 @@ void loopCentral () {
         
       //Check if both modes match and delay the central device if needed
       if ((centralModeValue != oldCMode) || (peripheralModeValue != oldPMode)) {
+        Serial.println("Made it to oldMode loop");
           // while modes do not match, check which one needs to wait
           if(centralModeValue == 1) {
             while(*pModeCharacteristic.value() == 3) {
@@ -330,9 +333,12 @@ void loopCentral () {
             }
           }
           else if (centralModeValue == 3) {
+            Serial.println("Made it to cMode equals 3 else if");
             while (*pModeCharacteristic.value() == 2) {
+              Serial.println("Made it to pMode equals 2 while loop");
               //If peripheral is 2 and central is 3, then central needs to wait for peripheral to catch up
               if (pModeCharacteristic.written()) {
+                Serial.println("pMode written");
                 peripheralModeValue = (byte)*pModeCharacteristic.value();
               }
             }
