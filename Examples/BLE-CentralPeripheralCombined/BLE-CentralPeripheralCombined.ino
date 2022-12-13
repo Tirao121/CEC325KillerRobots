@@ -22,22 +22,26 @@
 // BLE UUIDs
 //----------------------------------------------------------------------------------------------------------------------
 #define BLE_UUID_PERIPHERAL          "c87dd0eb-290a-4df5-ba37-ca7b9418b205"
-#define BLE_UUID_MODE              "c87dd0eb-290a-4df5-ba37-ca7b9418b207"
+#define BLE_UUID_PMODE              "c87dd0eb-290a-4df5-ba37-ca7b9418b206"
+#define BLE_UUID_CMODE              "c87dd0eb-290a-4df5-ba37-ca7b9418b207"
 
 BLEService modeService(BLE_UUID_PERIPHERAL); // Bluetooth® Low Energy Mode Service
 
 // create mode characteristic and allow remote device to get notifications
-BLEByteCharacteristic modeCharacteristic(BLE_UUID_MODE, BLERead | BLEWrite | BLENotify);
+BLEByteCharacteristic pModeCharacteristic(BLE_UUID_PMODE, BLERead | BLEWrite | BLENotify);
+BLEByteCharacteristic cModeCharacteristic(BLE_UUID_CMODE, BLERead | BLEWrite | BLENotify);
 
 // define which device this is
 #define setPeripheral 0   //Can change: 1 is peripheral, 0 is central
 char* robotName;
 
 // variables for bluetooth
-byte oldMode = 1;
+byte oldPMode = 1;
+byte oldCMode = 3;
 
 //Variables
-byte mode = 3;
+byte pMode = 2;
+byte cMode = 3;
 
 void setup() {
   Serial.begin(115200);
@@ -72,13 +76,15 @@ void setup() {
     BLE.setAdvertisedService(modeService);
 
     // add the characteristic to the service
-    modeService.addCharacteristic(modeCharacteristic);
+    modeService.addCharacteristic(pModeCharacteristic);
+    modeService.addCharacteristic(cModeCharacteristic);
 
     // add service
     BLE.addService(modeService);
 
     // set the initial value for the characeristic:
-    modeCharacteristic.writeValue(2);
+    pModeCharacteristic.writeValue(pMode);
+    cModeCharacteristic.writeValue(cMode);
   
     // start advertising
     BLE.advertise();
@@ -100,7 +106,7 @@ void loop() {
   if (setPeripheral == 1) {
     loopPeripheral();
     delay(5000);
-    mode = 2;
+    pMode = 2;
   }
   //if central device
   else {
@@ -123,12 +129,12 @@ void loopPeripheral() {
       // while the central is still connected to peripheral:
       while (central.connected()) {
         // initialize the current mode
-        byte peripheralModeValue = modeCharacteristic.value(); //some error here
-        byte centralModeValue = 3;
+        byte peripheralModeValue = pModeCharacteristic.value(); //some error here
+        byte centralModeValue = cModeCharacteristic.value();
         Serial.println("Set mode values");
         
         //Check if both modes match and delay the peripheral device if needed
-        while (oldMode != modeCharacteristic.value()) {
+        if ((oldPMode != pModeCharacteristic.value()) || (oldCMode != cModeCharacteristic.value())) {
           Serial.println("Made it to oldMode while loop");
           // while peripheral mode changed, check which one needs to wait
           if(centralModeValue == 1) {
@@ -239,33 +245,50 @@ void loopCentral () {
   }
 
   // retrieve the Mode characteristic
-  BLECharacteristic modeCharacteristic = peripheral.characteristic(BLE_UUID_MODE);
+  BLECharacteristic pModeCharacteristic = peripheral.characteristic(BLE_UUID_PMODE);
+  BLECharacteristic cModeCharacteristic = peripheral.characteristic(BLE_UUID_CMODE);
 
-  if (!modeCharacteristic) {
-    Serial.println("Peripheral does not have mode characteristic!");
+  if (!pModeCharacteristic) {
+    Serial.println("Peripheral does not have pMode characteristic!");
     peripheral.disconnect();
     return;
-  } else if (!modeCharacteristic.canRead()) {
-    Serial.println("Peripheral does not have a readable mode characteristic!");
+  } else if (!pModeCharacteristic.canRead()) {
+    Serial.println("Peripheral does not have a readable pMode characteristic!");
     peripheral.disconnect();
     return;
-  } else if (!modeCharacteristic.canSubscribe()) {
-    Serial.println("Peripheral does not allow mode subscriptions (notify)");
-  } else if(!modeCharacteristic.subscribe()) {
+  } else if (!pModeCharacteristic.canSubscribe()) {
+    Serial.println("Peripheral does not allow pMode subscriptions (notify)");
+  } else if(!pModeCharacteristic.subscribe()) {
     Serial.println("Subscription failed!");
   } else {
-    Serial.println("Connected to distance characteristic");
+    Serial.println("Connected to peripheral mode characteristic");
+  }
+
+  if (!cModeCharacteristic) {
+    Serial.println("Peripheral does not have cMode characteristic!");
+    peripheral.disconnect();
+    return;
+  } else if (!cModeCharacteristic.canRead()) {
+    Serial.println("Peripheral does not have a readable cMode characteristic!");
+    peripheral.disconnect();
+    return;
+  } else if (!cModeCharacteristic.canSubscribe()) {
+    Serial.println("Peripheral does not allow cMode subscriptions (notify)");
+  } else if(!cModeCharacteristic.subscribe()) {
+    Serial.println("Subscription failed!");
+  } else {
+    Serial.println("Connected to central mode characteristic");
   }
 
   while (peripheral.connected()) {
     // while the peripheral is connected
 
       // initialize the current mode
-      byte centralModeValue = mode;
-      byte peripheralModeValue = (char)*modeCharacteristic.value();
+      byte centralModeValue = (byte)*cModeCharacteristic.value();
+      byte peripheralModeValue = (byte)*pModeCharacteristic.value();
         
       //Check if both modes match and delay the central device if needed
-      while (centralModeValue != peripheralModeValue) {
+      if ((centralModeValue != oldCMode) || (peripheralModeValue != oldPMode)) {
           // while modes do not match, check which one needs to wait
           if(peripheralModeValue == 1) {
             if(centralModeValue == 2) {
