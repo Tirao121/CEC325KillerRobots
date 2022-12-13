@@ -42,6 +42,7 @@ byte oldCMode = 3;
 //Variables
 byte pMode = 2;
 byte cMode = 3;
+int startTime = millis();
 
 void setup() {
   Serial.begin(115200);
@@ -101,12 +102,11 @@ void setup() {
 }
 
 void loop() {
-  static int startTime = millis();
   int curTime = millis();
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
-    if (curTime - startTime > 5000) {
+    if (curTime - startTime > 10000) {
       pMode = 3;
     }
   }
