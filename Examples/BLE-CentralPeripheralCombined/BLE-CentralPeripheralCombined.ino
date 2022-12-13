@@ -136,6 +136,10 @@ void loopPeripheral() {
         //Check if both modes match and delay the peripheral device if needed
         if ((oldPMode != pModeCharacteristic.value()) || (oldCMode != cModeCharacteristic.value())) {
           Serial.println("Made it to oldMode while loop");
+          Serial.print("Central Mode: ");
+        Serial.println(centralModeValue);
+        Serial.print("Peripheral Mode: ");
+        Serial.println(peripheralModeValue);
           // while peripheral mode changed, check which one needs to wait
           if(peripheralModeValue == 1) {
             while(cModeCharacteristic.value() == 3) {
@@ -295,6 +299,10 @@ void loopCentral () {
       //Check if both modes match and delay the central device if needed
       if ((centralModeValue != oldCMode) || (peripheralModeValue != oldPMode)) {
         Serial.println("Made it to oldMode loop");
+        Serial.print("Central Mode: ");
+        Serial.println(centralModeValue);
+        Serial.print("Peripheral Mode: ");
+        Serial.println(peripheralModeValue);
           // while modes do not match, check which one needs to wait
           if(centralModeValue == 1) {
             while(*pModeCharacteristic.value() == 3) {
