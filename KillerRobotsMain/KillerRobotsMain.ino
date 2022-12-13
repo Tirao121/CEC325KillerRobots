@@ -189,7 +189,7 @@ double standby() {
       int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
     //Only negative peak - enters field, not move away
     if(peak == -1) {
-      Serial.println(pos);
+      //Serial.println(pos);
       delay(1000);
       mode = 2;
       return pos;
@@ -380,15 +380,15 @@ void idle(){
 }
 
 void turn(double victimAngle) {
-  double centerD = 83.00; //depends on board. Must be calibrated
-  int centerI = 83; //depends on board. Must be calibrated
+  double centerD = 104.0; //depends on board. Must be calibrated
+  int centerI = 104; //depends on board. Must be calibrated
   //Serial.println("Im Turning");
   if (victimAngle < centerD) {
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 255/2); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  Serial.println((centerD - victimAngle));
+  //Serial.println((centerD - victimAngle));
   delay((centerD - victimAngle) * (20.0)); //done through interation. Could be diff for diff board
   }
   if (victimAngle > centerD) {
@@ -397,13 +397,13 @@ void turn(double victimAngle) {
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
   //delay(2000);
-  Serial.println((victimAngle - centerD));
+  //Serial.println((victimAngle - centerD));
   delay((victimAngle - centerD) * (20.0)); //done through interation. Could be diff for diff board
   }
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 0); //L forward
   analogWrite(AIN2, 0); //L back
-  analogWrite(BIN1, 0); //R back
+  analogWrite(BIN1, 0); //R backf
   myservo.write(centerI); //May need to be calibrated. It should be in the center
   delay(1000);
 
