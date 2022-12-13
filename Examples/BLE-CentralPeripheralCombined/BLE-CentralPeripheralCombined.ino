@@ -106,7 +106,7 @@ void loop() {
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
-    if (curTime - startTime > 10000) {
+    if (curTime - startTime > 20000) {
       pMode = 3;
     }
   }
@@ -132,10 +132,10 @@ void loopPeripheral() {
       while (central.connected()) {
         // initialize the current mode
         if (pModeCharacteristic.value() != pMode) {
-          pModeCharacteristic.writeValue(pMode);
+          pModeCharacteristic.writeValue((byte)pMode);
         }
         if (cModeCharacteristic.value() != cMode) {
-          cModeCharacteristic.writeValue(cMode);
+          cModeCharacteristic.writeValue((byte)cMode);
         }
         byte peripheralModeValue = (byte)pModeCharacteristic.value(); //some error here
         byte centralModeValue = (byte)cModeCharacteristic.value();
