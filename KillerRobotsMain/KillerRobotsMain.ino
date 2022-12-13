@@ -140,8 +140,8 @@ void loop() {
       Alert();
 
       curTime = millis();
-      if (curTime - lastTime >= 20000) {
-        mode = 3;   //after 5 seconds, implement withdraw function
+      if (curTime - lastTime >= 10000) {
+        mode = 3;   //after 10 seconds, implement withdraw function
         lastTime = millis();
       }
       break;
