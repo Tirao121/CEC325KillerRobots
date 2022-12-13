@@ -129,14 +129,12 @@ void loopPeripheral() {
       // while the central is still connected to peripheral:
       while (central.connected()) {
         // initialize the current mode
-        byte peripheralModeValue;
-        pModeCharacteristic.readValue(peripheralModeValue); //some error here
-        byte centralModeValue;
-        cModeCharacteristic.readValue(centralModeValue);
+        byte peripheralModeValue = (byte)pModeCharacteristic.value(); //some error here
+        byte centralModeValue = (byte)cModeCharacteristic.value();
         Serial.println("Set mode values");
         
         //Check if both modes match and delay the peripheral device if needed
-        if ((oldPMode != pModeCharacteristic.readValue(peripheralModeValue)) || (oldCMode != cModeCharacteristic.readValue(centralModeValue))) {
+        if ((oldPMode != pModeCharacteristic.value()) || (oldCMode != cModeCharacteristic.value())) {
           Serial.println("Made it to oldMode while loop");
           Serial.print("Central Mode: ");
         Serial.println(centralModeValue);
@@ -144,10 +142,10 @@ void loopPeripheral() {
         Serial.println(peripheralModeValue);
           // while peripheral mode changed, check which one needs to wait
           if(peripheralModeValue == 1) {
-            while(cModeCharacteristic.readValue(centralModeValue) == 3) {
+            while(cModeCharacteristic.value() == 3) {
               //If central is 3 and peripheral is 1, then peripheral needs to wait for central to catch up
               if (cModeCharacteristic.written()) {
-                cModeCharacteristic.readValue(centralModeValue);
+                centralModeValue = cModeCharacteristic.value();
               }
             }
             if (centralModeValue == 2) {
@@ -163,10 +161,10 @@ void loopPeripheral() {
           }
           else if(peripheralModeValue == 2) {
             Serial.println("Made it to PMode Else If");
-            while(cModeCharacteristic.readValue(centralModeValue) == 1) {
+            while(cModeCharacteristic.value() == 1) {
               //If central is 1 and peripheral is 2, then peripheral needs to wait for central to catch up
               if (cModeCharacteristic.written()) {
-                cModeCharacteristic.readValue(centralModeValue);
+                centralModeValue = cModeCharacteristic.value();
               }
             }
             if (centralModeValue == 3) {
@@ -182,10 +180,10 @@ void loopPeripheral() {
             }
           }
           else if (peripheralModeValue == 3) {
-            while (cModeCharacteristic.readValue(centralModeValue) == 2) {
+            while (cModeCharacteristic.value() == 2) {
               //If central is 2 and peripheral is 3, then peripheral needs to wait for central to catch up
               if (cModeCharacteristic.written()) {
-                cModeCharacteristic.readValue(centralModeValue);
+                centralModeValue = cModeCharacteristic.value();
               }
             }
             if (centralModeValue == 1) {
