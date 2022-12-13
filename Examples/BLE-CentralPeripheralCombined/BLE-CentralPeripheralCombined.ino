@@ -101,12 +101,14 @@ void setup() {
 }
 
 void loop() {
-  
+  static int startTime = millis();
+  int curTime = millis();
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
-    delay(5000);
-    pMode = 2;
+    if (curTime - startTime > 5000) {
+      pMode = 3;
+    }
   }
   //if central device
   else {
