@@ -56,9 +56,9 @@ PeakDetection peakDetection; // create PeakDetection object
 int mode = 1;
 double proxThreashold = 100;
   //PID Constants
-  float KP = 15;  // proportional control gain
-  float KI = 0; // integral gain
-  float KD = 0;    // derivative gain
+  float KP = 12;  // proportional control gain
+  float KI = .001; // integral gain
+  float KD = 8;    // derivative gain
 int proximity = 0;
 int motorspeed = 50;
 double angle = 90;       //swivel angle when change detected - default 90
@@ -67,7 +67,7 @@ int alertCounter = 0;
 unsigned long lastTime = millis();
 unsigned long curTime;
 int turnNeeded = 1;
-int proxThreshold = 70;
+float proxThreshold = 400.0;
 
 void setup() {
   Serial.begin(115200);
@@ -137,10 +137,10 @@ void loop() {
         turn(angle);
       }
       attack();
-      //Alert();
+      Alert();
 
       curTime = millis();
-      if (curTime - lastTime >= 5000) {
+      if (curTime - lastTime >= 20000) {
         mode = 3;   //after 5 seconds, implement withdraw function
         lastTime = millis();
       }
@@ -189,7 +189,7 @@ double standby() {
       int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
     //Only negative peak - enters field, not move away
     if(peak == -1) {
-      Serial.println(pos);
+      //Serial.println(pos);
       delay(1000);
       mode = 2;
       return pos;
@@ -222,11 +222,12 @@ float pidControl(float error) {
   static int lastError = 0;
   float d = KD*(error - lastError);
   cumError += KI*(float)error;
-  Serial.print(cumError);
-  Serial.print(",");
-  Serial.print(d);
-  Serial.print(",");
-  lastError = error;
+  //Serial.print(cumError);
+  //Serial.print(",");
+  //Serial.print(d);
+  //Serial.print(",");
+  lastError = error; 
+  //Serial.println(error);
   return(KP*error + (float)cumError + d);
 }
 
@@ -235,6 +236,9 @@ void attack() {
   proximity = sensor.readRangeSingleMillimeters();
   float distanceError = proximity-proxThreshold;
   float  motorSpeed = pidControl(distanceError);
+  //Serial.println(distanceError);
+  //Serial.println(proximity);
+  //Serial.println(proxThreshold);  
 
     int absSpeed = abs(motorSpeed);
   if(motorSpeed > 0) {
@@ -384,19 +388,19 @@ void turn(double victimAngle) {
   analogWrite(BIN1, 0); //R back
   delay((90 - victimAngle) * (76.0/9.0)); //angle multiplied by 76/9
   }
-  if (victimAngle > 90.0) {
+  if (victimAngle > 100.0) {
   analogWrite(BIN2, 255/2); //R forward
   analogWrite(AIN1, 0); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
   //delay(2000);
-  delay((victimAngle - 90) * (76.0/9.0)); //angle multiplied by 76/9
+  delay((victimAngle - 100.0) * (76.0/9.0)); //angle multiplied by 76/9
   }
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 0); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  myservo.write(90); //May need to be calibrated. It should be in the center
+  myservo.write(100); //May need to be calibrated. It should be in the center
   delay(1000);
 
 
