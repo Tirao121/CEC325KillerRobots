@@ -42,7 +42,6 @@ byte oldCMode = 3;
 //Variables
 byte pMode = 2;
 byte cMode = 3;
-int startTime = millis();
 
 void setup() {
   Serial.begin(115200);
@@ -102,6 +101,7 @@ void setup() {
 }
 
 void loop() {
+  static int startTime = millis();
   int curTime = millis();
   //if peripheral device
   if (setPeripheral == 1) {
@@ -166,8 +166,12 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            oldPMode = pMode;
-            oldCMode = cMode;
+            if (pMode == pModeCharacteristic.value()) {
+              oldPMode = pMode;
+            }
+            if (cMode == cModeCharacteristic.value()) {
+              oldCMode = cMode;
+            }
           }
           else if(peripheralModeValue == 2) {
             Serial.println("Made it to PMode Else If");
@@ -188,8 +192,12 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            oldPMode = pMode;
-            oldCMode = cMode;
+            if (pMode == pModeCharacteristic.value()) {
+              oldPMode = pMode;
+            }
+            if (cMode == cModeCharacteristic.value()) {
+              oldCMode = cMode;
+            }
           }
           else if (peripheralModeValue == 3) {
             while (cModeCharacteristic.value() == 2) {
@@ -208,8 +216,12 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            oldPMode = pMode;
-            oldCMode = cMode;
+            if (pMode == pModeCharacteristic.value()) {
+              oldPMode = pMode;
+            }
+            if (cMode == cModeCharacteristic.value()) {
+              oldCMode = cMode;
+            }
           }
         }
 
@@ -341,8 +353,12 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            oldPMode = pMode;
-            oldCMode = cMode;
+            if (pMode == pModeCharacteristic.readValue(pMode)) {
+              oldPMode = pMode;
+            }
+            if (cMode == cModeCharacteristic.readValue(cMode)) {
+              oldCMode = cMode;
+            }
           }
           else if(centralModeValue == 2) {
             while(pModeCharacteristic.readValue(peripheralModeValue) == 1) {
@@ -361,8 +377,12 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            oldPMode = pMode;
-            oldCMode = cMode;
+            if (pMode == pModeCharacteristic.readValue(pMode)) {
+              oldPMode = pMode;
+            }
+            if (cMode == cModeCharacteristic.readValue(cMode)) {
+              oldCMode = cMode;
+            }
           }
           else if (centralModeValue == 3) {
             Serial.println("Made it to cMode equals 3 else if");
@@ -384,8 +404,12 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
-            oldPMode = pMode;
-            oldCMode = cMode;
+            if (pMode == pModeCharacteristic.readValue(pMode)) {
+              oldPMode = pMode;
+            }
+            if (cMode == cModeCharacteristic.readValue(cMode)) {
+              oldCMode = cMode;
+            }
           }
         }
 
