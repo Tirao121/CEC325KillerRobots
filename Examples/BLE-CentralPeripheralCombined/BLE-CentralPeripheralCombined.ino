@@ -106,7 +106,7 @@ void loop() {
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
-    if (curTime - startTime > 10000) {
+    if (curTime - startTime > 20000) {
       pMode = 3;
     }
   }
@@ -166,6 +166,8 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if(peripheralModeValue == 2) {
             Serial.println("Made it to PMode Else If");
@@ -186,6 +188,8 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if (peripheralModeValue == 3) {
             while (cModeCharacteristic.value() == 2) {
@@ -204,6 +208,8 @@ void loopPeripheral() {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
         }
 
@@ -331,6 +337,8 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if(centralModeValue == 2) {
             while(pModeCharacteristic.readValue(peripheralModeValue) == 1) {
@@ -349,6 +357,8 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
           else if (centralModeValue == 3) {
             Serial.println("Made it to cMode equals 3 else if");
@@ -370,6 +380,8 @@ void loopCentral () {
               Serial.print("Peripheral Mode: ");
               Serial.println(peripheralModeValue);
             }
+            oldPMode = pMode;
+            oldCMode = cMode;
           }
         }
 
