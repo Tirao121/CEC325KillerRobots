@@ -131,6 +131,19 @@ void loopPeripheral() {
         cModeCharacteristic.writeValue(cMode);
         byte peripheralModeValue = (byte)pModeCharacteristic.value(); 
         byte centralModeValue = (byte)cModeCharacteristic.value();
+
+        Serial.print("pMode: ");
+        Serial.print(pMode);
+        Serial.print(" cMode: ");
+        Serial.print(cMode);
+        Serial.print(" pModeCharacteristic: ");
+        Serial.print(pModeCharacteristic.value());
+        Serial.print(" cModeCharacteristic: ");
+        Serial.print(cModeCharacteristic.value());
+        Serial.print(" peripheralModeValue: ");
+        Serial.print(peripheralModeValue);
+        Serial.print(" centralModeValue: ");
+        Serial.println(centralModeValue);
         
         //Check if both modes match and delay the peripheral device if needed
         if (peripheralModeValue != centralModeValue) {
@@ -349,6 +362,7 @@ void loopCentral () {
               //If peripheral is 2 and central is 3, then central needs to wait for peripheral to catch up
               while(!pModeCharacteristic.written()) {
                 //Wait until peripheral characteristic is updated
+                Serial.println("Waiting for pModeCharacteristic to be written");
               }
               pModeCharacteristic.readValue(peripheralModeValue);
             }
