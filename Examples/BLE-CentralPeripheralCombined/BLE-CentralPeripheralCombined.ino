@@ -102,7 +102,7 @@ void loop() {
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
-    if (curTime - startTime > 20000) {
+    if (curTime - startTime > 5000) {
       pMode = 3;
     }
   }
