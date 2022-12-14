@@ -151,7 +151,7 @@ void loopPeripheral() {
           if(peripheralModeValue == 1) {
             if (centralModeValue == 3) {
               //If central is 3 and peripheral is 1, then peripheral needs to wait for central to catch up
-              while(!cModeCharacteristic.value() == 3) {
+              while(cModeCharacteristic.value() == 3) {
                 //Wait until central characteristic is updated
               }
               centralModeValue = cModeCharacteristic.value();
@@ -170,7 +170,7 @@ void loopPeripheral() {
           else if(peripheralModeValue == 2) {
             if(centralModeValue == 1) {
               //If central is 1 and peripheral is 2, then peripheral needs to wait for central to catch up
-              while (!cModeCharacteristic.value() == 1) {
+              while (cModeCharacteristic.value() == 1) {
                 //Wait until central characteristic is updated
               }
               centralModeValue = cModeCharacteristic.value();
@@ -342,7 +342,7 @@ void loopCentral () {
           else if(centralModeValue == 2) {
             if (peripheralModeValue == 1) {
               //If peripheral is 1 and central is 2, then central needs to wait for peripheral to catch up
-              while(!peripheralModeValue == 1) {
+              while(peripheralModeValue == 1) {
                 //Wait until peripheral characteristic is updated
                 pModeCharacteristic.readValue(peripheralModeValue);
               }
@@ -362,7 +362,7 @@ void loopCentral () {
           else if (centralModeValue == 3) {
             if (peripheralModeValue == 2) {
               //If peripheral is 2 and central is 3, then central needs to wait for peripheral to catch up
-              while(peripheralModeValue) {
+              while(peripheralModeValue == 2) {
                 //Wait until peripheral characteristic is updated
                 pModeCharacteristic.readValue(peripheralModeValue);
                 Serial.println("Waiting for pModeCharacteristic to be written");
