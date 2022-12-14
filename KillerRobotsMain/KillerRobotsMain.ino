@@ -145,12 +145,12 @@ void setup() {
 
   // begin Bluetooth initialization
   if (!BLE.begin()) {
-    Serial.println("starting Bluetooth® Low Energy module failed!");
+    //Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
   else {
-    Serial.println("Bluetooth® Low Energy Central - Mode control");
+    //Serial.println("Bluetooth® Low Energy Central - Mode control");
   }
 
   //if peripheral device
@@ -174,14 +174,14 @@ void setup() {
     // start advertising
     BLE.advertise();
 
-    Serial.println("BLE Mode Peripheral Started");
+    //Serial.println("BLE Mode Peripheral Started");
   }
   //if central device
   else {
     // start scanning for peripherals
-    Serial.println("Connecting to Peripheral");
+    //Serial.println("Connecting to Peripheral");
     BLE.scanForUuid(BLE_UUID_PERIPHERAL);
-    Serial.println("Connected to Peripheral");
+    //Serial.println("Connected to Peripheral");
   }
 }
 
@@ -211,7 +211,7 @@ void loop() {
       Alert();
 
       curTime = millis();
-      if (curTime - lastTime >= 5000) {
+      if (curTime - lastTime >= 8000) {
         mode = 3;   //after 5 seconds, implement withdraw function
         lastTime = millis();
       }
@@ -259,10 +259,10 @@ double standby() {
   analogWrite(BIN2, 0);
   double pos = 0.0;
   int distance = 0;
-  for (pos = 40; pos <= 155; pos += .5) {
+  for (pos = 45; pos <= 155; pos += .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     distance = sensor.readRangeSingleMillimeters();
-    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+    if (sensor.timeoutOccurred()) { //Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
       float stdpt = peakDetection.add(data); // adds a new data point
       int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
@@ -279,7 +279,7 @@ double standby() {
   for (pos = 155; pos >= 15; pos -= .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     distance = sensor.readRangeSingleMillimeters();
-    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+    if (sensor.timeoutOccurred()) { //Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
     float stdpt = peakDetection.add(data); // adds a new data point
     int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
@@ -453,24 +453,24 @@ void idle(){
 void turn(double victimAngle) {
   double centerD = 104.0; //depends on board. Must be calibrated
   int centerI = 104; //depends on board. Must be calibrated
-  double multiplier = 25.0;
+  double multiplier = 15.0;
   //Serial.println("Im Turning");
-   Serial.println(victimAngle);
+  // Serial.println(victimAngle);
   if (victimAngle < centerD) {
   analogWrite(BIN2, 0); //R forward
-  analogWrite(AIN1, 255/2); //L forward
+  analogWrite(AIN1, 255); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  Serial.println((centerD - victimAngle));
+ // Serial.println((centerD - victimAngle));
   delay((centerD - victimAngle) * (multiplier)); //done through interation. Could be diff for diff board
   }
   if (victimAngle > centerD) {
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 0); //L forward
-  analogWrite(AIN2, 255/2); //L back
+  analogWrite(AIN2, 255); //L back
   analogWrite(BIN1, 0); //R back
   //delay(2000);
-  Serial.println((victimAngle - centerD));
+  //Serial.println((victimAngle - centerD));
   delay((victimAngle - centerD) * (multiplier)); //done through interation. Could be diff for diff board
   }
   analogWrite(BIN2, 0); //R forward
@@ -498,9 +498,9 @@ void loopPeripheral() {
 
     // if a central is connected to peripheral:
     if (central) {
-      Serial.print("Connected to central: ");
+      //Serial.print("Connected to central: ");
       // print the central's MAC address:
-      Serial.println(central.address());
+      //Serial.println(central.address());
 
       // while the central is still connected to peripheral:
       while (central.connected()) {
@@ -525,11 +525,11 @@ void loopPeripheral() {
               //If central is 1 and peripheral is 3, then central needs to wait for peripheral to catch up, peripheral needs to keep running
             }
             else if (centralModeValue != 2 || centralModeValue != 3) {
-              Serial.println("These modes don't make sense");
-              Serial.print("Central Mode: ");
-              Serial.println(centralModeValue);
-              Serial.print("Peripheral Mode: ");
-              Serial.println(peripheralModeValue);
+              //Serial.println("These modes don't make sense");
+              //Serial.print("Central Mode: ");
+              //Serial.println(centralModeValue);
+              //Serial.print("Peripheral Mode: ");
+              //Serial.println(peripheralModeValue);
             }
           }
           else if(peripheralModeValue == 2) {
@@ -544,11 +544,11 @@ void loopPeripheral() {
               //If central is 3 and peripheral is 2, then central needs to wait for peripheral to catch up, peripheral needs to keep running
             }
             else if (centralModeValue != 1 || centralModeValue != 3) {
-              Serial.println("These modes don't make sense");
-              Serial.print("Central Mode: ");
-              Serial.println(centralModeValue);
-              Serial.print("Peripheral Mode: ");
-              Serial.println(peripheralModeValue);
+              //Serial.println("These modes don't make sense");
+              //Serial.print("Central Mode: ");
+              //Serial.println(centralModeValue);
+              //Serial.print("Peripheral Mode: ");
+              //Serial.println(peripheralModeValue);
             }
           }
           else if (peripheralModeValue == 3) {
@@ -563,26 +563,26 @@ void loopPeripheral() {
               //If central is 2 and peripheral is 3, then central needs to wait for peripheral to catch up, peripheral needs to keep running
             }
             else if (centralModeValue != 2 || centralModeValue != 1) {
-              Serial.println("These modes don't make sense");
-              Serial.print("Central Mode: ");
-              Serial.println(centralModeValue);
-              Serial.print("Peripheral Mode: ");
-              Serial.println(peripheralModeValue);
+              //Serial.println("These modes don't make sense");
+              //Serial.print("Central Mode: ");
+              //Serial.println(centralModeValue);
+              //Serial.print("Peripheral Mode: ");
+              //Serial.println(peripheralModeValue);
             }
           }
         }
 
         // Modes should now match, can continue out of bluetooth and back to normal switch
-        Serial.println("Modes Match");
-        Serial.print("Central Mode: ");
-        Serial.println(centralModeValue);
-        Serial.print("Peripheral Mode: ");
-        Serial.println(peripheralModeValue);
+        //Serial.println("Modes Match");
+        //Serial.print("Central Mode: ");
+        //Serial.println(centralModeValue);
+        //Serial.print("Peripheral Mode: ");
+        //Serial.println(peripheralModeValue);
       }
 
       // when the central disconnects, print it out:
-      Serial.print(F("Disconnected from central: "));
-      Serial.println(central.address());
+      //Serial.print(F("Disconnected from central: "));
+      //Serial.println(central.address());
     }
 }
 
@@ -593,17 +593,17 @@ void loopCentral () {
 
     if (peripheral) {
       // discovered a peripheral, print out address, local name, and advertised service
-      Serial.print("Found ");
-      Serial.print(peripheral.address());
-      Serial.print(" '");
-      Serial.print(peripheral.localName());
-      Serial.print("' ");
-      Serial.print(peripheral.advertisedServiceUuid());
-      Serial.println();
+      //Serial.print("Found ");
+      //Serial.print(peripheral.address());
+      //Serial.print(" '");
+      //Serial.print(peripheral.localName());
+      //Serial.print("' ");
+      //Serial.print(peripheral.advertisedServiceUuid());
+      //Serial.println();
 
       if (peripheral.localName() != "KROSP") {
-        Serial.print("Wrong local name: ");
-        Serial.println(peripheral.localName());
+        //Serial.print("Wrong local name: ");
+        //Serial.println(peripheral.localName());
         return;
       }
 
@@ -611,21 +611,21 @@ void loopCentral () {
       BLE.stopScan();
 
       // connect to the peripheral
-  Serial.println("Connecting ...");
+  //Serial.println("Connecting ...");
 
   if (peripheral.connect()) {
-    Serial.println("Connected");
+    //Serial.println("Connected");
   } else {
-    Serial.println("Failed to connect!");
+    //Serial.println("Failed to connect!");
     return;
   }
 
   // discover peripheral attributes
-  Serial.println("Discovering attributes ...");
+  //Serial.println("Discovering attributes ...");
   if (peripheral.discoverAttributes()) {
-    Serial.println("Attributes discovered");
+    //Serial.println("Attributes discovered");
   } else {
-    Serial.println("Attribute discovery failed!");
+    //Serial.println("Attribute discovery failed!");
     peripheral.disconnect();
     return;
   }
@@ -635,35 +635,35 @@ void loopCentral () {
   BLECharacteristic cModeCharacteristic = peripheral.characteristic(BLE_UUID_CMODE);
 
   if (!pModeCharacteristic) {
-    Serial.println("Peripheral does not have pMode characteristic!");
+    //Serial.println("Peripheral does not have pMode characteristic!");
     peripheral.disconnect();
     return;
   } else if (!pModeCharacteristic.canRead()) {
-    Serial.println("Peripheral does not have a readable pMode characteristic!");
+    //Serial.println("Peripheral does not have a readable pMode characteristic!");
     peripheral.disconnect();
     return;
   } else if (!pModeCharacteristic.canSubscribe()) {
-    Serial.println("Peripheral does not allow pMode subscriptions (notify)");
+    //Serial.println("Peripheral does not allow pMode subscriptions (notify)");
   } else if(!pModeCharacteristic.subscribe()) {
-    Serial.println("Subscription failed!");
+    //Serial.println("Subscription failed!");
   } else {
-    Serial.println("Connected to peripheral mode characteristic");
+    //Serial.println("Connected to peripheral mode characteristic");
   }
 
   if (!cModeCharacteristic) {
-    Serial.println("Peripheral does not have cMode characteristic!");
+    //Serial.println("Peripheral does not have cMode characteristic!");
     peripheral.disconnect();
     return;
   } else if (!cModeCharacteristic.canRead()) {
-    Serial.println("Peripheral does not have a readable cMode characteristic!");
+    //Serial.println("Peripheral does not have a readable cMode characteristic!");
     peripheral.disconnect();
     return;
   } else if (!cModeCharacteristic.canSubscribe()) {
-    Serial.println("Peripheral does not allow cMode subscriptions (notify)");
+    //Serial.println("Peripheral does not allow cMode subscriptions (notify)");
   } else if(!cModeCharacteristic.subscribe()) {
-    Serial.println("Subscription failed!");
+    //Serial.println("Subscription failed!");
   } else {
-    Serial.println("Connected to central mode characteristic");
+    //Serial.println("Connected to central mode characteristic");
   }
 
   while (peripheral.connected()) {
@@ -675,11 +675,11 @@ void loopCentral () {
       byte peripheralModeValue;
       pModeCharacteristic.readValue(peripheralModeValue);
 
-      Serial.println("Initialized ModeValues");
-      Serial.print("Central: ");
-      Serial.println(centralModeValue);
-      Serial.print("Peripheral: ");
-      Serial.println(peripheralModeValue);
+     // Serial.println("Initialized ModeValues");
+      //Serial.print("Central: ");
+      //Serial.println(centralModeValue);
+      //Serial.print("Peripheral: ");
+      //Serial.println(peripheralModeValue);
         
       //Check if both modes match and delay the central device if needed
       if (centralModeValue != peripheralModeValue) {
@@ -696,11 +696,11 @@ void loopCentral () {
               //If peripheral is 2 and central is 1, then central needs to wait for peripheral to catch up
             }
             else if (peripheralModeValue != 2 || peripheralModeValue != 3) {
-              Serial.println("These modes don't make sense");
-              Serial.print("Central Mode: ");
-              Serial.println(centralModeValue);
-              Serial.print("Peripheral Mode: ");
-              Serial.println(peripheralModeValue);
+              //Serial.println("These modes don't make sense");
+              //Serial.print("Central Mode: ");
+              //Serial.println(centralModeValue);
+              //Serial.print("Peripheral Mode: ");
+              //Serial.println(peripheralModeValue);
             }
           }
           else if(centralModeValue == 2) {
@@ -715,11 +715,11 @@ void loopCentral () {
               //If peripheral is 3 and central is 2, then peripheral needs to wait for central to catch up, central needs to keep running
             }
             else if (peripheralModeValue != 2 || peripheralModeValue != 3) {
-              Serial.println("These modes don't make sense");
-              Serial.print("Central Mode: ");
-              Serial.println(centralModeValue);
-              Serial.print("Peripheral Mode: ");
-              Serial.println(peripheralModeValue);
+              //Serial.println("These modes don't make sense");
+              //Serial.print("Central Mode: ");
+              //Serial.println(centralModeValue);
+              //Serial.print("Peripheral Mode: ");
+              //Serial.println(peripheralModeValue);
             }
           }
           else if (centralModeValue == 3) {
@@ -734,25 +734,25 @@ void loopCentral () {
               //If peripheral is 1 and central is 3, then peripheral needs to wait for central to catch up, central needs to keep running
             }
             else if (peripheralModeValue != 2 || peripheralModeValue != 1) {
-              Serial.println("These modes don't make sense");
-              Serial.print("Central Mode: ");
-              Serial.println(centralModeValue);
-              Serial.print("Peripheral Mode: ");
-              Serial.println(peripheralModeValue);
+              //Serial.println("These modes don't make sense");
+              //Serial.print("Central Mode: ");
+              //Serial.println(centralModeValue);
+              //Serial.print("Peripheral Mode: ");
+              //Serial.println(peripheralModeValue);
             }
           }
         }
 
         // Modes should now match, can continue out of bluetooth and back to normal switch
-        Serial.println("Modes Match");
-        Serial.print("Central Mode: ");
-        Serial.println(centralModeValue);
-        Serial.print("Peripheral Mode: ");
-        Serial.println(peripheralModeValue);
+        //Serial.println("Modes Match");
+        //Serial.print("Central Mode: ");
+        //Serial.println(centralModeValue);
+        //Serial.print("Peripheral Mode: ");
+        //Serial.println(peripheralModeValue);
 
       // peripheral disconnected, start scanning again
       BLE.scanForUuid(BLE_UUID_PERIPHERAL);
     }
-    Serial.println(peripheral);
+    //Serial.println(peripheral);
   }
 }
