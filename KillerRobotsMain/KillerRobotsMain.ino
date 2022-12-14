@@ -495,7 +495,8 @@ void turn(double victimAngle) {
  delay(1000);
 
 }
-
+byte peripheralModeValue;
+byte centralModeValue;
 //The loop function for the peripheral device. It will connect to central and wait until both central and peripheral are in the same mode
 void loopPeripheral() {
   // listen for Bluetooth® Low Energy peripherals to connect:
@@ -512,8 +513,8 @@ void loopPeripheral() {
         // initialize the current mode
         pModeCharacteristic.writeValue(pMode);
         cModeCharacteristic.writeValue(cMode);
-        byte peripheralModeValue = (byte)pModeCharacteristic.value(); 
-        byte centralModeValue = (byte)cModeCharacteristic.value();
+        peripheralModeValue = (byte)pModeCharacteristic.value(); 
+        centralModeValue = (byte)cModeCharacteristic.value();
         
         //Check if both modes match and delay the peripheral device if needed
         if (peripheralModeValue != centralModeValue) {
@@ -761,9 +762,10 @@ void loopCentral () {
       // peripheral disconnected, start scanning again
       BLE.scanForUuid(BLE_UUID_PERIPHERAL);
     }
-    //Serial.println(peripheral);
-  }
-  if(centralModeValue == peripheralModeValue) {
+      if(centralModeValue == peripheralModeValue) {
     peripheral.disconnect();
   }
 }
+    //Serial.println(peripheral);
+}  
+
