@@ -393,7 +393,7 @@ void withdraw() {
   }
 
   //servos after 4s
-  if (curTime - lastTime <= 4000) {
+  if (curTime - lastTime <= 2000) {
        //Backs away 
     analogWrite(AIN1, 0);
     analogWrite(AIN2, 100);
