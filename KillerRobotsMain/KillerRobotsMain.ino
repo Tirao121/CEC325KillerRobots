@@ -73,9 +73,9 @@ byte cMode = 1;
 int mode = 1;
 double proxThreashold = 100;
   //PID Constants
-  float KP = 7;  // proportional control gain
-  float KI = .001; // integral gain
-  float KD = 10;    // derivative gain
+  float KP = 6;  // proportional control gain
+  float KI = .005; // integral gain
+  float KD = 5;    // derivative gain
 int proximity = 0;
 int motorspeed = 50;
 double angle = 90;       //swivel angle when change detected - default 90
@@ -339,9 +339,9 @@ void attack() {
 void Alert(){
   //Buzzer 
   if(alertCounter == 0){
-    tone(BUZZ_PIN, 466.16, 500);
+    tone(BUZZ_PIN, 466.16, 200);
   }
-   tone(BUZZ_PIN, 200, 500);
+   tone(BUZZ_PIN, 200, 200);
   if(alertCounter == 5){
   }
 
@@ -399,10 +399,6 @@ void withdraw() {
     analogWrite(AIN2, 100);
     analogWrite(BIN1, 100);
     analogWrite(BIN2, 0);
-    analogWrite(AIN1, 100);
-    analogWrite(AIN2, 0);
-    analogWrite(BIN1, 0);
-    analogWrite(BIN2, 100);
   } else {
       //breaks
     analogWrite(AIN1, 0);
@@ -474,9 +470,9 @@ void turn(double victimAngle) {
   delay((centerD - victimAngle) * (multiplier)); //done through interation. Could be diff for diff board
   }
   if (victimAngle > centerD) {
-  analogWrite(BIN2, 0); //R forward
+  analogWrite(BIN2, 255/2); //R forward
   analogWrite(AIN1, 0); //L forward
-  analogWrite(AIN2, 255/2); //L back
+  analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
   //delay(2000);
   //Serial.println((victimAngle - centerD));
