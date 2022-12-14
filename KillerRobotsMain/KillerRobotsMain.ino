@@ -73,9 +73,9 @@ byte cMode = 1;
 int mode = 1;
 double proxThreashold = 100;
   //PID Constants
-  float KP = 12;  // proportional control gain
+  float KP = 7;  // proportional control gain
   float KI = .001; // integral gain
-  float KD = 8;    // derivative gain
+  float KD = 10;    // derivative gain
 int proximity = 0;
 int motorspeed = 50;
 double angle = 90;       //swivel angle when change detected - default 90
@@ -89,7 +89,8 @@ float proxThreshold = 400.0;
 void setup() {
   Serial.begin(115200);
   delay(2000);
-  Serial.println("Starting...");
+  
+Serial.println("Starting...");
 
   //Distance Sensor setup
   Wire.begin();
@@ -262,7 +263,7 @@ double standby() {
   for (pos = 45; pos <= 155; pos += .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     distance = sensor.readRangeSingleMillimeters();
-    if (sensor.timeoutOccurred()) { //Serial.print(" TIMEOUT"); }
+    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
       float stdpt = peakDetection.add(data); // adds a new data point
       int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
@@ -279,7 +280,7 @@ double standby() {
   for (pos = 155; pos >= 15; pos -= .5) {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     distance = sensor.readRangeSingleMillimeters();
-    if (sensor.timeoutOccurred()) { //Serial.print(" TIMEOUT"); }
+    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
       data = (float)distance/765-1;  // 16-bit int -> +/- 1.0 range
     float stdpt = peakDetection.add(data); // adds a new data point
     int peak = peakDetection.getPeak();//*5+75; // returns 0, 1 or -1
@@ -338,9 +339,9 @@ void attack() {
 void Alert(){
   //Buzzer 
   if(alertCounter == 0){
-    //tone(BUZZ_PIN, 466.16, 500);
+    tone(BUZZ_PIN, 466.16, 500);
   }
-   // tone(BUZZ_PIN, 200, 500);
+   tone(BUZZ_PIN, 200, 500);
   if(alertCounter == 5){
   }
 
@@ -398,8 +399,16 @@ void withdraw() {
     analogWrite(AIN2, 100);
     analogWrite(BIN1, 100);
     analogWrite(BIN2, 0);
+    analogWrite(AIN1, 100);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 100);
   } else {
       //breaks
+    analogWrite(AIN1, 0);
+    analogWrite(AIN2, 0);
+    analogWrite(BIN1, 0);
+    analogWrite(BIN2, 0);
     analogWrite(AIN1, 0);
     analogWrite(AIN2, 0);
     analogWrite(BIN1, 0);
@@ -453,12 +462,12 @@ void idle(){
 void turn(double victimAngle) {
   double centerD = 104.0; //depends on board. Must be calibrated
   int centerI = 104; //depends on board. Must be calibrated
-  double multiplier = 15.0;
+  double multiplier = 8.0;
   //Serial.println("Im Turning");
   // Serial.println(victimAngle);
   if (victimAngle < centerD) {
   analogWrite(BIN2, 0); //R forward
-  analogWrite(AIN1, 255); //L forward
+  analogWrite(AIN1, 255/2); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
  // Serial.println((centerD - victimAngle));
@@ -467,7 +476,7 @@ void turn(double victimAngle) {
   if (victimAngle > centerD) {
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 0); //L forward
-  analogWrite(AIN2, 255); //L back
+  analogWrite(AIN2, 255/2); //L back
   analogWrite(BIN1, 0); //R back
   //delay(2000);
   //Serial.println((victimAngle - centerD));
