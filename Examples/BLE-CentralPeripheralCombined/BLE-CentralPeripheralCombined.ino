@@ -97,14 +97,9 @@ void setup() {
 }
 
 void loop() {
-  static int startTime = millis();
-  int curTime = millis();
   //if peripheral device
   if (setPeripheral == 1) {
     loopPeripheral();
-    if (curTime - startTime > 5000) {
-      pMode = 3;
-    }
   }
   //if central device
   else {
@@ -126,6 +121,11 @@ void loopPeripheral() {
 
       // while the central is still connected to peripheral:
       while (central.connected()) {
+          static int startTime = millis();
+          int curTime = millis();
+            if (curTime - startTime > 5000) {
+              pMode = 3;
+            }
         // initialize the current mode
         pModeCharacteristic.writeValue(pMode);
         cModeCharacteristic.writeValue(cMode);
