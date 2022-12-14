@@ -398,16 +398,8 @@ void withdraw() {
     analogWrite(AIN2, 100);
     analogWrite(BIN1, 100);
     analogWrite(BIN2, 0);
-    analogWrite(AIN1, 100);
-    analogWrite(AIN2, 0);
-    analogWrite(BIN1, 0);
-    analogWrite(BIN2, 100);
   } else {
       //breaks
-    analogWrite(AIN1, 0);
-    analogWrite(AIN2, 0);
-    analogWrite(BIN1, 0);
-    analogWrite(BIN2, 0);
     analogWrite(AIN1, 0);
     analogWrite(AIN2, 0);
     analogWrite(BIN1, 0);
