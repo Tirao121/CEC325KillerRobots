@@ -382,31 +382,32 @@ void idle(){
 void turn(double victimAngle) {
   double centerD = 104.0; //depends on board. Must be calibrated
   int centerI = 104; //depends on board. Must be calibrated
+  double multiplier = 25.0;
   //Serial.println("Im Turning");
+   Serial.println(victimAngle);
   if (victimAngle < centerD) {
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 255/2); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R back
-  //Serial.println((centerD - victimAngle));
-  delay((centerD - victimAngle) * (20.0)); //done through interation. Could be diff for diff board
+  Serial.println((centerD - victimAngle));
+  delay((centerD - victimAngle) * (multiplier)); //done through interation. Could be diff for diff board
   }
   if (victimAngle > centerD) {
-  analogWrite(BIN2, 255/2); //R forward
+  analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 0); //L forward
-  analogWrite(AIN2, 0); //L back
+  analogWrite(AIN2, 255/2); //L back
   analogWrite(BIN1, 0); //R back
   //delay(2000);
-  //Serial.println((victimAngle - centerD));
-  delay((victimAngle - centerD) * (20.0)); //done through interation. Could be diff for diff board
+  Serial.println((victimAngle - centerD));
+  delay((victimAngle - centerD) * (multiplier)); //done through interation. Could be diff for diff board
   }
   analogWrite(BIN2, 0); //R forward
   analogWrite(AIN1, 0); //L forward
   analogWrite(AIN2, 0); //L back
   analogWrite(BIN1, 0); //R backf
   myservo.write(centerI); //May need to be calibrated. It should be in the center
-  delay(1000);
-
+ 
 
  // if turn is complete by the end of this function
   if (sensor.readRangeSingleMillimeters() < 765) {
@@ -415,5 +416,6 @@ void turn(double victimAngle) {
   mode = 1;
   turnNeeded = 1; 
   }
+ delay(1000);
 
 }
